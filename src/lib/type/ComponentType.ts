@@ -71,9 +71,25 @@ export type toolIcoType = {
 };
 
 export type mouseEventType = {
-  mouseDownFn: (event: MouseEvent | TouchEvent) => void;
-  mouseMoveFn: (event: MouseEvent | TouchEvent) => void;
-  mouseUpFn: () => void;
+  mouseDownFn: (
+    event: MouseEvent | TouchEvent,
+    mouseX: number,
+    mouseY: number,
+    addHistory: () => void
+  ) => void;
+  mouseMoveFn: (
+    event: MouseEvent | TouchEvent,
+    mouseInfo: {
+      startX: number;
+      startY: number;
+      currentX: number;
+      currentY: number;
+    },
+    showLastHistory: (context: CanvasRenderingContext2D) => void
+  ) => void;
+  mouseUpFn: (
+    showLastHistory: (context: CanvasRenderingContext2D) => void
+  ) => void;
 };
 
 // 截图工具栏图标数据类型

@@ -24,3 +24,12 @@ export function addHistory() {
   // 启用撤销按钮
   data.setUndoStatus(true);
 }
+
+export function showLastHistory(context: CanvasRenderingContext2D) {
+  const data = new InitData();
+  context.putImageData(
+    data.getHistory()[data.getHistory().length - 1]["data"],
+    0,
+    0
+  );
+}
