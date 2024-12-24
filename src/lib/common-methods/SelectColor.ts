@@ -1,7 +1,6 @@
-import InitData from "@/lib/main-entrance/InitData";
+import toolBarStore from "@/store/ToolBarStore";
 
 export function selectColor() {
-  const data = new InitData();
   // 显示颜色选择面板
-  data.setColorPanelStatus(true);
+  toolBarStore.setColorPanelStatus(true);
 }

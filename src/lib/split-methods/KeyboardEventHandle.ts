@@ -1,5 +1,5 @@
 // 键盘按下事件处理类
-import InitData from "@/lib/main-entrance/InitData";
+import toolBarStore from "@/store/ToolBarStore";
 
 export default class KeyboardEventHandle {
   // 截图工具栏容器
@@ -9,7 +9,6 @@ export default class KeyboardEventHandle {
     screenShotController: HTMLCanvasElement,
     toolController: HTMLDivElement
   ) {
-    const data = new InitData();
     const textInputContainer = document.getElementById("textInputPanel");
     this.toolController = toolController;
     // 调整截图容器显示权重
@@ -17,8 +16,8 @@ export default class KeyboardEventHandle {
     // 监听全局键盘按下事件
     document.body.addEventListener("keydown", (event: KeyboardEvent) => {
       // 文本输入框存在时则终止
-      if (data.getTextEditState()) {
-        data.setTextEditState(false);
+      if (toolBarStore.textEditState) {
+        toolBarStore.setTextEditState(false);
         return;
       }
       if (event.code === "Escape") {

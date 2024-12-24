@@ -1,31 +1,27 @@
-import InitData from "@/lib/main-entrance/InitData";
+import toolBarStore from "@/store/ToolBarStore";
+import textInputStore from "@/store/TextInputStore";
 
 export function selectTextSize() {
-  const data = new InitData();
   // 显示文字大小选择面板
-  data.setTextSizeOptionStatus(true);
+  textInputStore.setTextSizeOptionStatus(true);
 }
 
 export function setTextSize(size: number) {
-  const data = new InitData();
   // 设置字体大小
-  data.setFontSize(size);
+  toolBarStore.setFontSize(size);
 }
 
 export function getTextSize() {
-  const data = new InitData();
   // 获取字体大小
-  return data.getFontSize();
+  return toolBarStore.fontSize;
 }
 
 export function hiddenTextSizeOptionStatus() {
-  const data = new InitData();
   // 隐藏文字大小选择面板
-  data.setTextSizeOptionStatus(false);
+  textInputStore.setTextSizeOptionStatus(false);
 }
 
 export function hiddenColorPanelStatus() {
-  const data = new InitData();
   // 隐藏颜色选择面板
-  data.setColorPanelStatus(false);
+  toolBarStore.setColorPanelStatus(false);
 }

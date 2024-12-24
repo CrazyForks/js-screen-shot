@@ -23,7 +23,7 @@ import {
   setTextSize
 } from "@/lib/common-methods/SelectTextSize";
 import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
-import InitData from "@/lib/main-entrance/InitData";
+import toolBarStore from "@/store/ToolBarStore";
 
 export default class CreateDom {
   // 截图区域canvas容器
@@ -44,7 +44,6 @@ export default class CreateDom {
   private readonly closeCallback: Function | undefined;
   // 需要隐藏的图标
   private readonly hiddenIcoArr: string[];
-  private data: InitData;
 
   // 截图工具栏图标
   private readonly toolbar: Array<toolbarType>;
@@ -77,7 +76,6 @@ export default class CreateDom {
     this.closeCallback = options?.closeCallback;
     this.hiddenIcoArr = [];
     this.toolbar = Object.assign([], toolbar);
-    this.data = new InitData();
     this.optionController.addEventListener("click", evt => {
       const target = evt.target as HTMLElement;
       if (target.id === "colorSelectPanel" || target.id === "textSizePanel") {
@@ -381,11 +379,11 @@ export default class CreateDom {
     itemPanel.style.backgroundSize = "cover";
     // 鼠标移入时修改图标
     itemPanel.addEventListener("mouseenter", e => {
-      this.switchBgIcon(e, item.activeIcon as string, this.data.getToolId());
+      this.switchBgIcon(e, item.activeIcon as string, toolBarStore.toolId);
     });
     // 鼠标移出时恢复图标
     itemPanel.addEventListener("mouseleave", e => {
-      this.switchBgIcon(e, item.icon as string, this.data.getToolId());
+      this.switchBgIcon(e, item.icon as string, toolBarStore.toolId);
     });
   }
 

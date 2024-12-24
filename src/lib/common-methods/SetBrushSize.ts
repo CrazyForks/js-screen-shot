@@ -1,5 +1,5 @@
-import InitData from "@/lib/main-entrance/InitData";
 import { setSelectedClassName } from "@/lib/common-methods/SetSelectedClassName";
+import toolBarStore from "@/store/ToolBarStore";
 
 /**
  * 设置画笔大小
@@ -12,7 +12,6 @@ export function setBrushSize(
   index: number,
   mouseEvent: MouseEvent
 ) {
-  const data = new InitData();
   // 为当前点击项添加选中时的class名
   setSelectedClassName(mouseEvent, index, true);
   let sizeNum = 2;
@@ -27,7 +26,7 @@ export function setBrushSize(
       sizeNum = 10;
       break;
   }
-  data.setPenSize(sizeNum);
+  toolBarStore.setPenSize(sizeNum);
   return sizeNum;
 }
 
@@ -42,7 +41,6 @@ export function setMosaicPenSize(
   index: number,
   mouseEvent: MouseEvent
 ) {
-  const data = new InitData();
   // 为当前点击项添加选中时的class名
   setSelectedClassName(mouseEvent, index, true);
   let sizeNum = 10;
@@ -57,6 +55,6 @@ export function setMosaicPenSize(
       sizeNum = 40;
       break;
   }
-  data.setMosaicPenSize(sizeNum);
+  toolBarStore.setMosaicPenSize(sizeNum);
   return sizeNum;
 }

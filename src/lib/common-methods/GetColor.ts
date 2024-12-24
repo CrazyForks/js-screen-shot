@@ -1,7 +1,6 @@
-import InitData from "@/lib/main-entrance/InitData";
+import toolBarStore from "@/store/ToolBarStore";
 
 export function getColor(index: number) {
-  const data = new InitData();
   let currentColor = "#F53440";
   switch (index) {
     case 1:
@@ -35,8 +34,8 @@ export function getColor(index: number) {
       currentColor = "#FEFFFF";
       break;
   }
-  data.setSelectedColor(currentColor);
+  toolBarStore.setSelectedColor(currentColor);
   // 隐藏颜色选择面板
-  data.setColorPanelStatus(false);
+  toolBarStore.setColorPanelStatus(false);
   return currentColor;
 }

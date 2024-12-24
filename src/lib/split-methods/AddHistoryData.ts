@@ -1,11 +1,11 @@
-import InitData from "@/lib/main-entrance/InitData";
 import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
+import cropBoxStore from "@/store/CropBoxStore";
+import toolBarStore from "@/store/ToolBarStore";
 
 // 保存当前画布状态
 export function addHistory() {
-  const data = new InitData();
   const plugInParameters = new PlugInParameters();
-  const screenShotController = data.getScreenShotContainer();
+  const screenShotController = cropBoxStore.getScreenShotContainer();
   if (screenShotController == null) return;
   // 获取canvas容器
   // 获取canvas画布与容器
@@ -13,22 +13,21 @@ export function addHistory() {
     "2d"
   ) as CanvasRenderingContext2D;
   const controller = screenShotController;
-  if (data.getHistory().length > plugInParameters.getMaxUndoNum()) {
+  if (toolBarStore.history.length > plugInParameters.getMaxUndoNum()) {
     // 删除最早的一条画布记录
-    data.shiftHistory();
+    toolBarStore.shiftHistory();
   }
   // 保存当前画布状态
-  data.pushHistory({
+  toolBarStore.pushHistory({
     data: context.getImageData(0, 0, controller.width, controller.height)
   });
   // 启用撤销按钮
-  data.setUndoStatus(true);
+  toolBarStore.setUndoStatus(true);
 }
 
 export function showLastHistory(context: CanvasRenderingContext2D) {
-  const data = new InitData();
   context.putImageData(
-    data.getHistory()[data.getHistory().length - 1]["data"],
+    toolBarStore.history[toolBarStore.history.length - 1]["data"],
     0,
     0
   );
