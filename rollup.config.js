@@ -10,6 +10,7 @@ import alias from "@rollup/plugin-alias";
 import postcssImport from "postcss-import";
 import postcssUrl from "postcss-url";
 import url from "@rollup/plugin-url";
+import replace from "@rollup/plugin-replace";
 import cssnano from "cssnano";
 import yargs from "yargs";
 import {
@@ -70,6 +71,9 @@ export default {
       // 读取.browserslist文件
       browser: true,
       preferBuiltins: false
+    }),
+    replace({
+      "process.env.NODE_ENV": JSON.stringify("production")
     }),
     commonjs(),
     alias({
