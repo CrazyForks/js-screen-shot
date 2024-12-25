@@ -124,6 +124,7 @@ export default class ScreenShot {
   // 鼠标是否在裁剪框内
   private mouseInsideCropBox = false;
   private proxyUrl: undefined | string = undefined;
+  private h2cIgnoreElementsFn: (element: Element) => boolean = () => false;
   private useCORS = false;
   private drawStatus = false;
   // webrtc模式下的屏幕流数据
@@ -271,6 +272,7 @@ export default class ScreenShot {
       html2canvas(this.screenShotDom ? this.screenShotDom : document.body, {
         onclone: this.loadCrossImg ? drawCrossImg : undefined,
         proxy: this.proxyUrl,
+        ignoreElements: this.h2cIgnoreElementsFn,
         useCORS: this.useCORS
       })
         .then(canvas => {
@@ -1042,6 +1044,9 @@ export default class ScreenShot {
     }
     if (options?.useCORS) {
       this.useCORS = options.useCORS;
+    }
+    if (options?.h2cIgnoreElementsCallback) {
+      this.h2cIgnoreElementsFn = options.h2cIgnoreElementsCallback;
     }
     // 设置截图容器的位置信息
     if (options?.position != null) {

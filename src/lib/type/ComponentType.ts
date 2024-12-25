@@ -171,4 +171,5 @@ export type screenShotType = {
   destroyContainer?: boolean; // 确认截图时是否销毁容器
   userToolbar?: Array<userToolbarType>; // 用户自定义的工具栏图标
   canvasEvents?: mouseEventType; // 截图画布的事件监听
+  h2cIgnoreElementsCallback?: (element: Element) => boolean; // html2canvas模式需要忽略的元素回调
 };
