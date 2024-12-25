@@ -22,8 +22,9 @@ import {
   selectTextSize,
   setTextSize
 } from "@/lib/common-methods/SelectTextSize";
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
+
 import toolBarStore from "@/store/ToolBarStore";
+import userParamStore from "@/store/UserParamStore";
 
 export default class CreateDom {
   // 截图区域canvas容器
@@ -65,7 +66,6 @@ export default class CreateDom {
   ];
 
   constructor(options: screenShotType) {
-    const plugInParameters = new PlugInParameters();
     this.screenShotController = document.createElement("canvas");
     this.toolController = document.createElement("div");
     this.optionIcoController = document.createElement("div");
@@ -111,11 +111,7 @@ export default class CreateDom {
     // 为画笔绘制选项角标设置class
     this.setOptionIcoClassName();
     // 将自定义的数据插入到默认数据的倒数第二个位置
-    this.toolbar.splice(
-      toolbar.length - 2,
-      0,
-      ...plugInParameters.getUserToolbar()
-    );
+    this.toolbar.splice(toolbar.length - 2, 0, ...userParamStore.userToolbar);
     // 渲染工具栏
     this.setToolBarIco();
     // 渲染文字大小选择容器

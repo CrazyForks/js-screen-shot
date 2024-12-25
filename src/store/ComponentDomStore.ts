@@ -1,5 +1,4 @@
 import { makeObservable, observable, action } from "mobx";
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
 
 class ComponentDomStore {
   @observable screenShotController: HTMLCanvasElement | null = null;

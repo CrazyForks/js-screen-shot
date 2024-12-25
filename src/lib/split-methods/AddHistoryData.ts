@@ -1,10 +1,9 @@
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
 import cropBoxStore from "@/store/CropBoxStore";
 import toolBarStore from "@/store/ToolBarStore";
+import userParamStore from "@/store/UserParamStore";
 
 // 保存当前画布状态
 export function addHistory() {
-  const plugInParameters = new PlugInParameters();
   const screenShotController = cropBoxStore.getScreenShotContainer();
   if (screenShotController == null) return;
   // 获取canvas容器
@@ -13,7 +12,7 @@ export function addHistory() {
     "2d"
   ) as CanvasRenderingContext2D;
   const controller = screenShotController;
-  if (toolBarStore.history.length > plugInParameters.getMaxUndoNum()) {
+  if (toolBarStore.history.length > userParamStore.maxUndoNum) {
     // 删除最早的一条画布记录
     toolBarStore.shiftHistory();
   }

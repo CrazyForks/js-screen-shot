@@ -8,13 +8,13 @@ import { takeOutHistory } from "@/lib/common-methods/TakeOutHistory";
 import { drawCutOutBox } from "@/lib/split-methods/DrawCutOutBox";
 import { drawText } from "@/lib/split-methods/DrawText";
 import { addHistory } from "@/lib/split-methods/AddHistoryData";
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
 import { userToolbarFnType } from "@/lib/type/ComponentType";
 import cropBoxStore from "@/store/CropBoxStore";
 import toolBarStore from "@/store/ToolBarStore";
 import textInputStore from "@/store/TextInputStore";
 import componentDomStore from "@/store/ComponentDomStore";
 import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
+import userParamStore from "@/store/UserParamStore";
 
 function getToolbarContainer() {
   const textInputController = textInputStore.getTextInputController();
@@ -89,7 +89,6 @@ export function toolClickEvent(
   completeCallback: Function | undefined,
   closeCallback: Function | undefined
 ) {
-  const plugInParameters = new PlugInParameters();
   toolBarStore.setActiveToolName(toolName);
   toolBarStore.setToolId(index);
   const toolBarContainer = getToolbarContainer();
@@ -145,7 +144,7 @@ export function toolClickEvent(
   // 保存图片
   if (toolName == "save") {
     getCanvasImgData(true);
-    const callback = plugInParameters.getSaveCallback();
+    const callback = userParamStore.saveCallback;
     if (callback) {
       callback(0, "保存成功");
     }
@@ -167,7 +166,7 @@ export function toolClickEvent(
     if (completeCallback) {
       completeCallback({ base64, cutInfo: cropBoxStore.cutOutBoxPosition });
     }
-    if (!plugInParameters.getDestroyContainerState()) {
+    if (!userParamStore.destroyContainer) {
       // 隐藏工具栏
       toolBarStore.setToolStatus(false);
       toolBarStore.setOptionStatus(false);

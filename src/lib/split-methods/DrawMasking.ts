@@ -1,4 +1,4 @@
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
+import userParamStore from "@/store/UserParamStore";
 
 /**
  * 绘制蒙层
@@ -9,9 +9,7 @@ export function drawMasking(
   context: CanvasRenderingContext2D,
   imgData?: HTMLCanvasElement
 ) {
-  const data = new PlugInParameters();
-  const plugInParameters = new PlugInParameters();
-  const canvasSize = plugInParameters.getCanvasSize();
+  const canvasSize = userParamStore.getCanvasSize();
   const viewSize = {
     width: parseFloat(window.getComputedStyle(document.body).width),
     height: parseFloat(window.getComputedStyle(document.body).height)
@@ -31,7 +29,7 @@ export function drawMasking(
   // 清除画布
   context.clearRect(0, 0, maxWidth, maxHeight);
   // 屏幕截图存在且展示截图数据的状态为true则进行绘制
-  if (imgData != null && plugInParameters.getShowScreenDataStatus()) {
+  if (imgData != null && userParamStore.showScreenData) {
     // 调用者传了画布尺寸则使用，否则使用窗口宽高
     if (canvasSize.canvasWidth !== 0 && canvasSize.canvasHeight !== 0) {
       context.drawImage(
@@ -47,7 +45,7 @@ export function drawMasking(
   }
   // 绘制蒙层
   context.save();
-  const maskColor = data.getMaskColor();
+  const maskColor = userParamStore.maskColor;
   context.fillStyle = "rgba(0, 0, 0, .6)";
   if (maskColor) {
     context.fillStyle = `rgba(${maskColor.r}, ${maskColor.g}, ${maskColor.b}, ${maskColor.a})`;

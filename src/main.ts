@@ -25,7 +25,6 @@ import { zoomCutOutBoxPosition } from "@/lib/common-methods/ZoomCutOutBoxPositio
 import { saveBorderArrInfo } from "@/lib/common-methods/SaveBorderArrInfo";
 import { calculateToolLocation } from "@/lib/split-methods/CalculateToolLocation";
 import html2canvas from "html2canvas";
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
 import { getDrawBoundaryStatus } from "@/lib/split-methods/BoundaryJudgment";
 import KeyboardEventHandle from "@/lib/split-methods/KeyboardEventHandle";
 import { setPlugInParameters } from "@/lib/split-methods/SetPlugInParameters";
@@ -42,6 +41,7 @@ import toolBarStore from "@/store/ToolBarStore";
 import textInputStore from "@/store/TextInputStore";
 import componentDomStore from "@/store/ComponentDomStore";
 import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
+import userParamStore from "@/store/UserParamStore";
 
 export default class ScreenShot {
   // video容器用于存放屏幕MediaStream流
@@ -65,7 +65,7 @@ export default class ScreenShot {
   private optionController: HTMLDivElement | null | undefined;
   private optionIcoController: HTMLDivElement | null | undefined;
   private cutBoxSizeContainer: HTMLDivElement | null | undefined;
-  private plugInParameters: PlugInParameters;
+
   private wrcReplyTime = 500;
   private keyboardEventHandle: null | KeyboardEventHandle = null;
   // 图形位置参数
@@ -149,7 +149,6 @@ export default class ScreenShot {
   };
 
   constructor(options: screenShotType) {
-    this.plugInParameters = new PlugInParameters();
     // 提取options中的有用参数设置到全局参数中
     setPlugInParameters(options);
     // 创建截图所需dom并设置回调函数
@@ -227,7 +226,7 @@ export default class ScreenShot {
     triggerCallback: Function | undefined,
     cancelCallback: Function | undefined
   ) {
-    const canvasSize = this.plugInParameters.getCanvasSize();
+    const canvasSize = userParamStore.getCanvasSize();
     const viewSize = {
       width: parseFloat(window.getComputedStyle(document.body).width),
       height: parseFloat(window.getComputedStyle(document.body).height)
@@ -261,7 +260,7 @@ export default class ScreenShot {
     if (context == null) return;
     // 显示截图区域容器
     screenShotCanvasStore.showScreenShotPanel();
-    if (!this.plugInParameters.getWebRtcStatus()) {
+    if (!userParamStore.enableWebRtc) {
       // 判断用户是否自己传入截屏图片
       if (this.imgSrc != null) {
         this.drawPictures(triggerCallback, context, this.imgSrc);
@@ -292,9 +291,9 @@ export default class ScreenShot {
       return;
     }
     // 调用者有传入屏幕流数据则使用
-    if (this.plugInParameters.getScreenFlow()) {
+    if (userParamStore.screenFlow) {
       this.sendStream(
-        this.plugInParameters.getScreenFlow(),
+        userParamStore.screenFlow,
         cancelCallback,
         triggerCallback
       );
@@ -332,7 +331,7 @@ export default class ScreenShot {
     setTimeout(() => {
       // 获取截图区域canvas容器画布
       if (this.screenShotContainer == null) return;
-      const canvasSize = this.plugInParameters.getCanvasSize();
+      const canvasSize = userParamStore.getCanvasSize();
       let containerWidth = this.screenShotImageController?.width;
       let containerHeight = this.screenShotImageController?.height;
       // 用户有传宽高时，则使用用户的
@@ -557,7 +556,7 @@ export default class ScreenShot {
       this.drawGraphPosition.startX = mouseX;
       this.drawGraphPosition.startY = mouseY;
       this.isCustomTool() &&
-        this.plugInParameters
+        userParamStore
           .getCanvasEvents()
           ?.mouseDownFn(event, mouseX, mouseY, addHistory);
     }
@@ -709,7 +708,7 @@ export default class ScreenShot {
         this.drawStatus = true;
       }
       this.isCustomTool() &&
-        this.plugInParameters.getCanvasEvents()?.mouseMoveFn(
+        userParamStore.getCanvasEvents()?.mouseMoveFn(
           event,
           {
             startX,
@@ -744,7 +743,7 @@ export default class ScreenShot {
           break;
         case "right-top":
           // 绘制等比例箭头
-          if (this.plugInParameters.getRatioArrow()) {
+          if (userParamStore.useRatioArrow) {
             drawLineArrow(
               this.screenShotCanvas,
               startX,
@@ -1166,7 +1165,7 @@ export default class ScreenShot {
     // 工具栏已点击且进行了绘制
     if (toolBarStore.toolClickStatus && this.drawStatus) {
       this.isCustomTool() &&
-        this.plugInParameters.getCanvasEvents()?.mouseUpFn(showLastHistory);
+        userParamStore.getCanvasEvents()?.mouseUpFn(showLastHistory);
       // 保存绘制记录
       addHistory();
       return;

@@ -1,9 +1,8 @@
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
+import userParamStore from "@/store/UserParamStore";
 
 export function drawCrossImg(html: Document) {
   const promises: Promise<string>[] = [];
   const imageNodes = html.querySelectorAll("img");
-  const plugInParameters = new PlugInParameters();
   imageNodes.forEach(element => {
     const href = element.getAttribute("src");
     if (!href) return;
@@ -25,7 +24,7 @@ export function drawCrossImg(html: Document) {
         resolve("转换成功");
       };
       img.onerror = function(err) {
-        const h2cCrossImgLoadErrFn = plugInParameters?.getH2cCrossImgLoadErrFn();
+        const h2cCrossImgLoadErrFn = userParamStore.h2cCrossImgLoadErrFn;
         if (h2cCrossImgLoadErrFn && typeof err != "string") {
           h2cCrossImgLoadErrFn({
             ...err,

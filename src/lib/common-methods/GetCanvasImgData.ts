@@ -1,13 +1,13 @@
 import { saveCanvasToImage } from "@/lib/common-methods/SaveCanvasToImage";
 import { saveCanvasToBase64 } from "@/lib/common-methods/SaveCanvasToBase64";
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
+
 import cropBoxStore from "@/store/CropBoxStore";
+import userParamStore from "@/store/UserParamStore";
 
 /**
  * 将指定区域的canvas转为图片
  */
 export function getCanvasImgData(isSave: boolean) {
-  const plugInParameters = new PlugInParameters();
   const screenShotCanvas = cropBoxStore
     .getScreenShotContainer()
     ?.getContext("2d");
@@ -27,7 +27,7 @@ export function getCanvasImgData(isSave: boolean) {
         width,
         height,
         0.75,
-        plugInParameters.getWriteImgState()
+        userParamStore.writeBase64
       );
     }
   }

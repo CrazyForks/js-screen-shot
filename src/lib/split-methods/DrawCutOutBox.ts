@@ -1,4 +1,4 @@
-import PlugInParameters from "@/lib/main-entrance/PlugInParameters";
+import userParamStore from "@/store/UserParamStore";
 
 /**
  * 绘制裁剪框
@@ -29,7 +29,6 @@ export function drawCutOutBox(
   const canvasWidth = controller?.width;
   const canvasHeight = controller?.height;
   const dpr = window.devicePixelRatio || 1;
-  const data = new PlugInParameters();
 
   // 画布、图片不存在则return
   if (!canvasWidth || !canvasHeight || !imageController || !controller) return;
@@ -41,7 +40,7 @@ export function drawCutOutBox(
 
   // 绘制蒙层
   context.save();
-  const maskColor = data.getMaskColor();
+  const maskColor = userParamStore.maskColor;
   context.fillStyle = "rgba(0, 0, 0, .6)";
   if (maskColor) {
     context.fillStyle = `rgba(${maskColor.r}, ${maskColor.g}, ${maskColor.b}, ${maskColor.a})`;
@@ -53,7 +52,7 @@ export function drawCutOutBox(
   context.clearRect(mouseX, mouseY, width, height);
   // 绘制8个边框像素点并保存坐标信息以及事件参数
   context.globalCompositeOperation = "source-over";
-  context.fillStyle = data.getCutBoxBdColor();
+  context.fillStyle = userParamStore.cutBoxBdColor;
   // 是否绘制裁剪框的8个像素点
   if (drawBorders) {
     // 像素点大小
@@ -106,24 +105,24 @@ export function drawCutOutBox(
   };
 
   // 用户有传入截图dom绘制时使用其dom的尺寸
-  const screenShotDom = data.getScreenShotDom();
+  const screenShotDom = userParamStore.screenShotDom;
   if (screenShotDom != null) {
     imgWidth = screenShotDom.clientWidth;
     imgHeight = screenShotDom.clientHeight;
   }
 
   // 用户有传入自定义尺寸则使用
-  if (data.getCustomImgSize().useCustomImgSize) {
-    const { w, h } = data.getCustomImgSize().customImgSize;
+  if (userParamStore.getCustomImgSize().useCustomImgSize) {
+    const { w, h } = userParamStore.getCustomImgSize().customImgSize;
     imgWidth = w;
     imgHeight = h;
   }
 
   // 非webrtc模式、未开启图片自适应、未自定义图片尺寸、未传入截图dom时，图片的宽高不做处理
   if (
-    !data.getWebRtcStatus() &&
-    !data.getImgAutoFit() &&
-    !data.getCustomImgSize().useCustomImgSize &&
+    !userParamStore.enableWebRtc &&
+    !userParamStore.imgAutoFit &&
+    !userParamStore.getCustomImgSize().useCustomImgSize &&
     screenShotDom == null
   ) {
     imgWidth = imageController.width / dpr;
