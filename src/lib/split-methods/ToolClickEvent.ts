@@ -95,8 +95,6 @@ export function toolClickEvent(
   if (toolBarContainer == null) {
     return;
   }
-  // 设置裁剪框工具栏为点击状态
-  toolBarStore.setToolClickStatus(true);
   const {
     screenShotController,
     ScreenShotImageController,
@@ -110,6 +108,8 @@ export function toolClickEvent(
       ScreenShotImageController
     );
   }
+  // 设置裁剪框工具栏为点击状态
+  toolBarStore.setToolClickStatus(true);
   // 更新当前点击的工具栏条目
   toolBarStore.setToolName(toolName);
   // 为当前点击项添加选中时的class名
@@ -201,8 +201,6 @@ export function toolClickEventForUserDefined(
   if (toolBarContainer == null) {
     return;
   }
-  // 设置裁剪框工具栏为点击状态
-  toolBarStore.setToolClickStatus(true);
   const {
     screenShotController,
     ScreenShotImageController,
@@ -225,6 +223,8 @@ export function toolClickEventForUserDefined(
       toolId: index
     }
   });
+  // 设置裁剪框工具栏为点击状态
+  toolBarStore.setToolClickStatus(true);
   toolBarStore.setToolName(toolName);
   setSelectedClassName(mouseEvent, Number.MAX_VALUE, false);
   // 隐藏选项面板
@@ -233,4 +233,6 @@ export function toolClickEventForUserDefined(
   // 初始化点击状态
   cropBoxStore.setDragging(false);
   cropBoxStore.setDraggingTrim(false);
+  // 设置裁剪框工具栏为点击状态
+  toolBarStore.setToolClickStatus(true);
 }

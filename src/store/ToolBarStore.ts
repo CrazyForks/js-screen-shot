@@ -186,7 +186,6 @@ class ToolBarStore {
 
   // 设置工具点击状态
   setToolClickStatus(status: boolean) {
-    console.log("更新点击状态", status);
     this.toolClickStatus = status;
   }
 
