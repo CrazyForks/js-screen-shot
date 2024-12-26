@@ -95,6 +95,8 @@ export function toolClickEvent(
   if (toolBarContainer == null) {
     return;
   }
+  // 设置裁剪框工具栏为点击状态
+  toolBarStore.setToolClickStatus(true);
   const {
     screenShotController,
     ScreenShotImageController,
@@ -181,9 +183,6 @@ export function toolClickEvent(
     toolBarStore.setOptionStatus(false);
     takeOutHistory();
   }
-
-  // 设置裁剪框工具栏为点击状态
-  toolBarStore.setToolClickStatus(true);
 }
 
 // 处理用户自定义工具栏的点击事件
@@ -202,6 +201,8 @@ export function toolClickEventForUserDefined(
   if (toolBarContainer == null) {
     return;
   }
+  // 设置裁剪框工具栏为点击状态
+  toolBarStore.setToolClickStatus(true);
   const {
     screenShotController,
     ScreenShotImageController,
@@ -232,6 +233,4 @@ export function toolClickEventForUserDefined(
   // 初始化点击状态
   cropBoxStore.setDragging(false);
   cropBoxStore.setDraggingTrim(false);
-  // 设置裁剪框工具栏为点击状态
-  toolBarStore.setToolClickStatus(true);
 }

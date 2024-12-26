@@ -1,35 +1,44 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { positionInfoType } from "@/lib/type/ComponentType";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
 import componentDomStore from "@/store/ComponentDomStore";
 
 class CropBoxStore {
-  @observable draggingTrim = false;
-  @observable dragging = false;
-  @observable borderSize = 10;
-  @observable cutOutBoxPosition: positionInfoType = {
-    startX: 0,
-    startY: 0,
-    width: 0,
-    height: 0
-  };
-
-  constructor() {
-    makeObservable(this);
+  private initialState() {
+    return {
+      draggingTrim: false,
+      dragging: false,
+      borderSize: 10,
+      cutOutBoxPosition: {
+        startX: 0,
+        startY: 0,
+        width: 0,
+        height: 0
+      } as positionInfoType
+    };
   }
 
-  @action.bound
+  // 可观察属性
+  draggingTrim: boolean = this.initialState().draggingTrim;
+  dragging: boolean = this.initialState().dragging;
+  borderSize: number = this.initialState().borderSize;
+  cutOutBoxPosition: positionInfoType = this.initialState().cutOutBoxPosition;
+
+  constructor() {
+    makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  // 设置拖动裁剪状态
   setDraggingTrim(draggingTrim: boolean) {
     this.draggingTrim = draggingTrim;
   }
 
-  @action.bound
+  // 设置拖动状态
   setDragging(dragging: boolean) {
     this.dragging = dragging;
   }
 
   // 设置裁剪框位置信息
-  @action.bound
   setCutOutBoxPosition(
     mouseX: number,
     mouseY: number,
@@ -45,7 +54,6 @@ class CropBoxStore {
   }
 
   // 获取裁剪框尺寸显示容器
-  @action.bound
   getCutBoxSizeContainer() {
     componentDomStore.cutBoxSizeContainer = document.getElementById(
       "cutBoxSizePanel"
@@ -54,7 +62,6 @@ class CropBoxStore {
   }
 
   // 获取截图容器dom
-  @action.bound
   getScreenShotContainer() {
     componentDomStore.screenShotController = document.getElementById(
       "screenShotContainer"
@@ -63,31 +70,26 @@ class CropBoxStore {
   }
 
   // 设置裁剪框尺寸显示容器展示状态
-  @action.bound
   setCutBoxSizeStatus(status: boolean) {
     if (componentDomStore.cutBoxSizeContainer == null) return;
-    if (status) {
-      componentDomStore.cutBoxSizeContainer.style.display = "flex";
-      return;
-    }
-    componentDomStore.cutBoxSizeContainer.style.display = "none";
+    componentDomStore.cutBoxSizeContainer.style.display = status
+      ? "flex"
+      : "none";
   }
 
   // 设置裁剪框尺寸显示容器位置
-  @action.bound
   setCutBoxSizePosition(x: number, y: number) {
     if (componentDomStore.cutBoxSizeContainer == null) return;
     const { left, top } = getToolRelativePosition(x, y);
-    componentDomStore.cutBoxSizeContainer.style.left = left + "px";
     let sscTop = 0;
     if (componentDomStore.screenShotController) {
       sscTop = parseInt(componentDomStore.screenShotController.style.top);
     }
-    componentDomStore.cutBoxSizeContainer.style.top = top + sscTop + "px";
+    componentDomStore.cutBoxSizeContainer.style.left = `${left}px`;
+    componentDomStore.cutBoxSizeContainer.style.top = `${top + sscTop}px`;
   }
 
   // 设置裁剪框尺寸
-  @action.bound
   setCutBoxSize(width: number, height: number) {
     if (componentDomStore.cutBoxSizeContainer == null) return;
     // width和height保留整数
@@ -104,7 +106,13 @@ class CropBoxStore {
     textPanel.innerText = `${width} * ${height}`;
     componentDomStore.cutBoxSizeContainer.appendChild(textPanel);
   }
+
+  // 重置状态
+  reset() {
+    Object.assign(this, this.initialState());
+  }
 }
+
 const cropBoxStore = new CropBoxStore();
 
 export default cropBoxStore;

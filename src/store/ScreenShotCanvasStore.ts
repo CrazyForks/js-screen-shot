@@ -1,18 +1,24 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import componentDomStore from "@/store/ComponentDomStore";
 import cropBoxStore from "@/store/CropBoxStore";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
 
 class ScreenShotCanvasStore {
+  private initialState() {
+    return {
+      imageController: null as HTMLCanvasElement | null
+    };
+  }
+
   // 存储获取到的屏幕截图
-  @observable imageController: HTMLCanvasElement | null = null;
+  imageController: HTMLCanvasElement | null = this.initialState()
+    .imageController;
 
   constructor() {
-    makeObservable(this);
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
   // 设置截图容器宽高
-  @action.bound
   setScreenShotInfo(width: number, height: number) {
     cropBoxStore.getScreenShotContainer();
     if (componentDomStore.screenShotController == null) return;
@@ -25,26 +31,29 @@ class ScreenShotCanvasStore {
   }
 
   // 设置截图容器位置
-  @action.bound
   setScreenShotPosition(left: number, top: number) {
     cropBoxStore.getScreenShotContainer();
     if (componentDomStore.screenShotController == null) return;
     const { left: rLeft, top: rTop } = getToolRelativePosition(left, top);
-    componentDomStore.screenShotController.style.left = rLeft + "px";
-    componentDomStore.screenShotController.style.top = rTop + "px";
+    componentDomStore.screenShotController.style.left = `${rLeft}px`;
+    componentDomStore.screenShotController.style.top = `${rTop}px`;
   }
 
   // 显示截图区域容器
-  @action.bound
   showScreenShotPanel() {
     cropBoxStore.getScreenShotContainer();
     if (componentDomStore.screenShotController == null) return;
     componentDomStore.screenShotController.style.display = "block";
   }
 
-  @action.bound
+  // 设置截图画布控制器
   setImageController(imageController: HTMLCanvasElement) {
     this.imageController = imageController;
+  }
+
+  // 重置状态
+  reset() {
+    Object.assign(this, this.initialState());
   }
 }
 

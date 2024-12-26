@@ -1,13 +1,12 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import componentDomStore from "@/store/ComponentDomStore";
 
 class TextInputStore {
   constructor() {
-    makeObservable(this);
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
   // 获取文本输入区域dom
-  @action.bound
   getTextInputController() {
     componentDomStore.textInputController = document.getElementById(
       "textInputPanel"
@@ -30,7 +29,6 @@ class TextInputStore {
   }
 
   // 设置文本输入工具栏展示状态
-  @action.bound
   setTextStatus(status: boolean) {
     this.getTextInputController();
     if (componentDomStore.textInputController == null) return;
@@ -42,7 +40,6 @@ class TextInputStore {
     componentDomStore.textInputController.style.display = "none";
   }
 
-  @action.bound
   // 设置截图工具栏文字大小下拉框选项选择工具展示状态
   setTextSizeOptionStatus(status: boolean) {
     this.getOptionTextSizeController();
@@ -54,7 +51,6 @@ class TextInputStore {
     componentDomStore.optionTextSizeController.style.display = "none";
   }
 
-  @action.bound
   setTextSizePanelStatus(status: boolean) {
     this.getTextSizeContainer();
     if (componentDomStore.textSizeContainer == null) return;

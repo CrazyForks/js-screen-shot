@@ -1,40 +1,57 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable } from "mobx";
 import componentDomStore from "@/store/ComponentDomStore";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
 import { textInfoType } from "@/lib/type/ComponentType";
 import { takeOutHistory } from "@/lib/common-methods/TakeOutHistory";
 
 class ToolBarStore {
-  @observable toolClickStatus = false;
-  @observable selectedColor = "#F53340";
-  @observable toolName = "";
-  @observable toolId: number | null = null;
-  // 当前选择的画笔大小
-  @observable penSize = 2;
-  // 当前选择的字体大小
-  @observable fontSize = 17;
-  // 马赛克工具的笔触大小
-  @observable mosaicPenSize = 10;
-  // 画笔历史记录
-  @observable history: Array<Record<string, any>> = [];
-  // 工具栏超出截图容器状态
-  @observable toolPositionStatus = false;
-  // 当前选中的工具
-  @observable activeTool = "";
-  // 当前是否处于文本编辑状态
-  @observable textEditState = false;
-  @observable textInfo: textInfoType = {
-    positionX: 0,
-    positionY: 0,
-    color: "#000000",
-    size: 0
-  };
-
-  constructor() {
-    makeObservable(this);
+  private initialState() {
+    return {
+      toolClickStatus: false,
+      selectedColor: "#F53340",
+      toolName: "",
+      toolId: null as number | null,
+      penSize: 2,
+      fontSize: 17,
+      mosaicPenSize: 10,
+      history: [] as Array<Record<string, any>>,
+      toolPositionStatus: false,
+      activeTool: "",
+      textEditState: false,
+      textInfo: {
+        positionX: 0,
+        positionY: 0,
+        color: "#000000",
+        size: 0
+      } as textInfoType
+    };
   }
 
-  @action.bound
+  toolClickStatus: boolean = this.initialState().toolClickStatus;
+  selectedColor: string = this.initialState().selectedColor;
+  toolName: string = this.initialState().toolName;
+  toolId: number | null = this.initialState().toolId;
+  // 当前选择的画笔大小
+  penSize: number = this.initialState().penSize;
+  // 当前选择的字体大小
+  fontSize: number = this.initialState().fontSize;
+  // 马赛克工具的笔触大小
+  mosaicPenSize: number = this.initialState().mosaicPenSize;
+  // 画笔历史记录
+  history: Array<Record<string, any>> = this.initialState().history;
+  // 工具栏超出截图容器状态
+  toolPositionStatus: boolean = this.initialState().toolPositionStatus;
+  // 当前选中的工具
+  activeTool: string = this.initialState().activeTool;
+  // 当前是否处于文本编辑状态
+  textEditState: boolean = this.initialState().textEditState;
+  textInfo: textInfoType = this.initialState().textInfo;
+
+  constructor() {
+    makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  // 获取工具栏 DOM 控制器
   getToolController() {
     componentDomStore.toolController = document.getElementById(
       "toolPanel"
@@ -42,7 +59,6 @@ class ToolBarStore {
     return componentDomStore.toolController;
   }
 
-  @action.bound
   getOptionController() {
     componentDomStore.optionController = document.getElementById(
       "optionPanel"
@@ -50,8 +66,7 @@ class ToolBarStore {
     return componentDomStore.optionController;
   }
 
-  // 获取截图工具栏画笔选择工具dom
-  @action.bound
+  // 获取截图工具栏画笔选择工具 DOM
   getOptionIcoController() {
     componentDomStore.optionIcoController = document.getElementById(
       "optionIcoController"
@@ -59,7 +74,6 @@ class ToolBarStore {
     return componentDomStore.optionIcoController;
   }
 
-  @action.bound
   getColorSelectPanel() {
     componentDomStore.colorSelectPanel = document.getElementById(
       "colorSelectPanel"
@@ -68,34 +82,27 @@ class ToolBarStore {
   }
 
   // 设置截图工具栏展示状态
-  @action.bound
   setToolStatus(status: boolean) {
-    // 获取一次最新的工具栏dom
+    // 获取一次最新的工具栏 DOM
     this.getToolController();
     if (componentDomStore.toolController == null) return;
-    if (status) {
-      componentDomStore.toolController.style.display = "block";
-      return;
-    }
-    componentDomStore.toolController.style.display = "none";
+    componentDomStore.toolController.style.display = status ? "block" : "none";
   }
 
   // 设置截图工具位置信息
-  @action.bound
   setToolInfo(left: number, top: number) {
     this.getToolController();
     if (componentDomStore.toolController == null) return;
     const { left: rLeft, top: rTop } = getToolRelativePosition(left, top);
-    componentDomStore.toolController.style.left = rLeft + "px";
+    componentDomStore.toolController.style.left = `${rLeft}px`;
     let sscTop = 0;
     if (componentDomStore.screenShotController) {
       sscTop = parseInt(componentDomStore.screenShotController.style.top);
     }
-    componentDomStore.toolController.style.top = rTop + sscTop + "px";
+    componentDomStore.toolController.style.top = `${rTop + sscTop}px`;
   }
 
   // 获取工具栏位置
-  @action.bound
   getToolPosition() {
     this.getToolController();
     if (componentDomStore.toolController == null) return;
@@ -129,7 +136,7 @@ class ToolBarStore {
     return componentDomStore.undoController;
   }
 
-  @action.bound
+  // 设置选项状态
   setOptionStatus(status: boolean) {
     // 获取截图工具栏与三角形角标容器
     this.getOptionIcoController();
@@ -139,17 +146,15 @@ class ToolBarStore {
       componentDomStore.optionController == null
     )
       return;
-    if (status) {
-      componentDomStore.optionIcoController.style.display = "block";
-      componentDomStore.optionController.style.display = "block";
-      return;
-    }
-    componentDomStore.optionIcoController.style.display = "none";
-    componentDomStore.optionController.style.display = "none";
+    componentDomStore.optionIcoController.style.display = status
+      ? "block"
+      : "none";
+    componentDomStore.optionController.style.display = status
+      ? "block"
+      : "none";
   }
 
   // 隐藏画笔工具栏三角形角标
-  @action.bound
   hiddenOptionIcoStatus() {
     this.getOptionIcoController();
     if (componentDomStore.optionIcoController == null) return;
@@ -157,7 +162,6 @@ class ToolBarStore {
   }
 
   // 设置画笔选择工具栏位置
-  @action.bound
   setOptionPosition(position: number) {
     // 获取截图工具栏与三角形角标容器
     this.getOptionIcoController();
@@ -170,22 +174,23 @@ class ToolBarStore {
     // 修改位置
     const toolPosition = this.getToolPosition();
     if (toolPosition == null) return;
-    const icoLeft = toolPosition.left + position + "px";
-    const icoTop = toolPosition.top + 44 + "px";
-    const optionLeft = toolPosition.left + "px";
-    const optionTop = toolPosition.top + 44 + 6 + "px";
+    const icoLeft = `${toolPosition.left + position}px`;
+    const icoTop = `${toolPosition.top + 44}px`;
+    const optionLeft = `${toolPosition.left}px`;
+    const optionTop = `${toolPosition.top + 44 + 6}px`;
     componentDomStore.optionIcoController.style.left = icoLeft;
     componentDomStore.optionIcoController.style.top = icoTop;
     componentDomStore.optionController.style.left = optionLeft;
     componentDomStore.optionController.style.top = optionTop;
   }
 
-  @action.bound
+  // 设置工具点击状态
   setToolClickStatus(status: boolean) {
+    console.log("更新点击状态", status);
     this.toolClickStatus = status;
   }
 
-  @action.bound
+  // 设置选中的颜色
   setSelectedColor(color: string) {
     this.selectedColor = color;
     this.getColorSelectPanel();
@@ -193,100 +198,92 @@ class ToolBarStore {
     componentDomStore.colorSelectPanel.style.backgroundColor = color;
   }
 
-  @action.bound
+  // 设置工具名称
   setToolName(itemName: string) {
     this.toolName = itemName;
   }
 
-  @action.bound
+  // 设置工具 ID
   setToolId(id: number | null) {
     this.toolId = id;
   }
 
-  @action.bound
+  // 设置画笔大小
   setPenSize(size: number) {
     this.penSize = size;
   }
 
-  @action.bound
+  // 设置马赛克笔触大小
   setMosaicPenSize(size: number) {
     this.mosaicPenSize = size;
   }
 
-  @action.bound
+  // 移除历史记录的第一个元素
   shiftHistory() {
     return this.history.shift();
   }
 
-  @action.bound
+  // 移除历史记录的最后一个元素
   popHistory() {
     return this.history.pop();
   }
 
-  @action.bound
+  // 添加历史记录
   pushHistory(item: Record<string, any>) {
     this.history.push(item);
   }
 
-  @action.bound
+  // 设置工具位置状态
   setToolPositionStatus(status: boolean) {
     this.toolPositionStatus = status;
   }
 
-  @action.bound
+  // 设置字体大小
   setFontSize(size: number) {
     this.fontSize = size;
   }
 
-  @action.bound
+  // 设置当前激活的工具名称
   setActiveToolName(toolName: string) {
     this.activeTool = toolName;
   }
 
-  @action.bound
+  // 设置文本信息
   setTextInfo(info: textInfoType) {
     this.textInfo = info;
   }
 
-  @action.bound
+  // 设置文本编辑状态
   setTextEditState(state: boolean) {
     this.textEditState = state;
   }
 
-  @action.bound
+  // 设置画笔选择状态
   setBrushSelectionStatus(status: boolean) {
     this.getBrushSelectionController();
     if (componentDomStore.brushSelectionController == null) return;
-    if (status) {
-      componentDomStore.brushSelectionController.style.display = "block";
-      return;
-    }
-    componentDomStore.brushSelectionController.style.display = "none";
+    componentDomStore.brushSelectionController.style.display = status
+      ? "block"
+      : "none";
   }
 
-  @action.bound
+  // 设置颜色面板状态
   setColorPanelStatus(status: boolean) {
     this.getColorPanel();
     if (componentDomStore.colorSelectController == null) return;
-    if (status) {
-      componentDomStore.colorSelectController.style.display = "flex";
-      return;
-    }
-    componentDomStore.colorSelectController.style.display = "none";
+    componentDomStore.colorSelectController.style.display = status
+      ? "flex"
+      : "none";
   }
 
-  @action.bound
+  // 设置右侧面板状态
   setRightPanel(status: boolean) {
     this.getRightPanel();
     if (componentDomStore.rightPanel == null) return;
-    if (status) {
-      componentDomStore.rightPanel.style.display = "flex";
-      return;
-    }
-    componentDomStore.rightPanel.style.display = "none";
+    componentDomStore.rightPanel.style.display = status ? "flex" : "none";
   }
 
-  @action.bound
+  // 设置撤销按钮状态
   setUndoStatus(status: boolean) {
     this.getUndoController();
     if (componentDomStore.undoController == null) return;
@@ -307,6 +304,11 @@ class ToolBarStore {
       "click",
       takeOutHistory
     );
+  }
+
+  // 重置状态
+  reset() {
+    Object.assign(this, this.initialState());
   }
 }
 

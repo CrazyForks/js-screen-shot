@@ -1,30 +1,64 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
+import cropBoxStore from "@/store/CropBoxStore";
+import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
+import toolBarStore from "@/store/ToolBarStore";
+import userParamStore from "@/store/UserParamStore";
 
 class ComponentDomStore {
-  @observable screenShotController: HTMLCanvasElement | null = null;
-  @observable toolController: HTMLDivElement | null = null;
-  @observable optionIcoController: HTMLDivElement | null = null;
-  @observable optionController: HTMLDivElement | null = null;
-  @observable cutBoxSizeContainer: HTMLDivElement | null = null;
-  @observable textInputController: HTMLDivElement | null = null;
-  @observable colorSelectPanel: HTMLElement | null = null;
-  @observable textSizeContainer: HTMLDivElement | null = null;
-  @observable optionTextSizeController: HTMLDivElement | null = null;
-  @observable brushSelectionController: HTMLDivElement | null = null;
-  @observable colorSelectController: HTMLElement | null = null;
-  @observable rightPanel: HTMLElement | null = null;
-  @observable undoController: HTMLElement | null = null;
-
-  // 截图容器是否可滚动
-  @observable noScrollStatus = false;
-  // 是否需要还原页面的滚动条状态
-  @observable resetScrollbarState = false;
-
-  constructor() {
-    makeObservable(this);
+  // 初始状态封装对象
+  private initialState() {
+    return {
+      screenShotController: null as HTMLCanvasElement | null,
+      toolController: null as HTMLDivElement | null,
+      optionIcoController: null as HTMLDivElement | null,
+      optionController: null as HTMLDivElement | null,
+      cutBoxSizeContainer: null as HTMLDivElement | null,
+      textInputController: null as HTMLDivElement | null,
+      colorSelectPanel: null as HTMLElement | null,
+      textSizeContainer: null as HTMLDivElement | null,
+      optionTextSizeController: null as HTMLDivElement | null,
+      brushSelectionController: null as HTMLDivElement | null,
+      colorSelectController: null as HTMLElement | null,
+      rightPanel: null as HTMLElement | null,
+      undoController: null as HTMLElement | null,
+      noScrollStatus: false,
+      resetScrollbarState: false
+    };
   }
 
-  @action.bound
+  // 可观察属性
+  screenShotController: HTMLCanvasElement | null = this.initialState()
+    .screenShotController;
+  toolController: HTMLDivElement | null = this.initialState().toolController;
+  optionIcoController: HTMLDivElement | null = this.initialState()
+    .optionIcoController;
+  optionController: HTMLDivElement | null = this.initialState()
+    .optionController;
+  cutBoxSizeContainer: HTMLDivElement | null = this.initialState()
+    .cutBoxSizeContainer;
+  textInputController: HTMLDivElement | null = this.initialState()
+    .textInputController;
+  colorSelectPanel: HTMLElement | null = this.initialState().colorSelectPanel;
+  textSizeContainer: HTMLDivElement | null = this.initialState()
+    .textSizeContainer;
+  optionTextSizeController: HTMLDivElement | null = this.initialState()
+    .optionTextSizeController;
+  brushSelectionController: HTMLDivElement | null = this.initialState()
+    .brushSelectionController;
+  colorSelectController: HTMLElement | null = this.initialState()
+    .colorSelectController;
+  rightPanel: HTMLElement | null = this.initialState().rightPanel;
+  undoController: HTMLElement | null = this.initialState().undoController;
+
+  // 截图容器是否可滚动
+  noScrollStatus: boolean = this.initialState().noScrollStatus;
+  // 是否需要还原页面的滚动条状态
+  resetScrollbarState: boolean = this.initialState().resetScrollbarState;
+
+  constructor() {
+    makeAutoObservable(this, {}, { autoBind: true });
+  }
+
   destroyDOM() {
     if (
       this.screenShotController == null ||
@@ -53,18 +87,33 @@ class ComponentDomStore {
       document.documentElement.classList.remove("hidden-screen-shot-scroll");
       document.body.classList.remove("hidden-screen-shot-scroll");
     }
+    // store中的状态重置
+    this.resetStore();
   }
 
-  @action.bound
   setNoScrollStatus(status?: boolean) {
     if (status != null) {
       this.noScrollStatus = status;
     }
   }
 
-  @action.bound
+  private resetStore() {
+    runInAction(() => {
+      this.reset();
+      cropBoxStore.reset();
+      screenShotCanvasStore.reset();
+      toolBarStore.reset();
+      userParamStore.reset();
+    });
+  }
+
   setResetScrollbarState(state: boolean) {
     this.resetScrollbarState = state;
+  }
+
+  // 重置状态
+  reset() {
+    Object.assign(this, this.initialState());
   }
 }
 
