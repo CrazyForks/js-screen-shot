@@ -21,6 +21,7 @@ class ComponentDomStore {
       colorSelectController: null as HTMLElement | null,
       rightPanel: null as HTMLElement | null,
       undoController: null as HTMLElement | null,
+      videoController: null as HTMLVideoElement | null,
       noScrollStatus: false,
       resetScrollbarState: false
     };
@@ -49,6 +50,8 @@ class ComponentDomStore {
     .colorSelectController;
   rightPanel: HTMLElement | null = this.initialState().rightPanel;
   undoController: HTMLElement | null = this.initialState().undoController;
+  videoController: HTMLVideoElement | null = this.initialState()
+    .videoController;
 
   // 截图容器是否可滚动
   noScrollStatus: boolean = this.initialState().noScrollStatus;
@@ -109,6 +112,17 @@ class ComponentDomStore {
 
   setResetScrollbarState(state: boolean) {
     this.resetScrollbarState = state;
+  }
+
+  // 初始化webrtc模式所需要的辅助dom
+  initWebRtcDom() {
+    componentDomStore.videoController = document.createElement("video");
+    componentDomStore.videoController.autoplay = true;
+  }
+
+  setVideoSrcObject(videoSrcObject: MediaStream | null) {
+    if (this.videoController == null) return;
+    this.videoController.srcObject = videoSrcObject;
   }
 
   // 重置状态

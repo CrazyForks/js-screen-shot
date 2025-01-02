@@ -44,8 +44,6 @@ import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
 import userParamStore from "@/store/UserParamStore";
 
 export default class ScreenShot {
-  // video容器用于存放屏幕MediaStream流
-  private readonly videoController: HTMLVideoElement;
   // 截图区域canvas容器
   private screenShotContainer: HTMLCanvasElement | null | undefined;
   private screenShotDom:
@@ -150,13 +148,12 @@ export default class ScreenShot {
   };
 
   constructor(options: screenShotType) {
-    // 提取options中的有用参数设置到全局参数中
+    // 提取调用者传入的配置
     setPlugInParameters(options);
     // 创建截图所需dom并设置回调函数
     new CreateDom(options);
-    // 创建并获取webrtc模式所需要的辅助dom
-    this.videoController = document.createElement("video");
-    this.videoController.autoplay = true;
+    // 创建webrtc模式所需要的辅助dom
+    componentDomStore.initWebRtcDom();
     this.screenShotImageController = document.createElement("canvas");
 
     // 设置插件的可选参数
@@ -313,7 +310,7 @@ export default class ScreenShot {
     triggerCallback: Function | undefined
   ) => {
     if (stream instanceof MediaStream) {
-      this.videoController.srcObject = stream;
+      componentDomStore.setVideoSrcObject(stream);
       this.loadScreenFlowData(triggerCallback);
     } else {
       if (cancelCallback != null) {
@@ -357,10 +354,15 @@ export default class ScreenShot {
         imgContainerWidth,
         imgContainerHeight
       );
-      if (context == null || imgContext == null) return;
+      if (
+        context == null ||
+        imgContext == null ||
+        componentDomStore.videoController == null
+      )
+        return;
       // 赋值截图区域canvas画布
       this.screenShotCanvas = context;
-      const { videoWidth, videoHeight } = this.videoController;
+      const { videoWidth, videoHeight } = componentDomStore.videoController;
       if (this.wrcWindowMode) {
         // 从窗口视频流中获取body内容
         const bodyImgData = this.getWindowContentData(
@@ -385,7 +387,7 @@ export default class ScreenShot {
         fixHeight =
           this.wrcImgPosition.h > 0 ? this.wrcImgPosition.h : fixHeight;
         imgContext?.drawImage(
-          this.videoController,
+          componentDomStore.videoController,
           this.wrcImgPosition.x,
           this.wrcImgPosition.y,
           fixWidth,
@@ -473,7 +475,7 @@ export default class ScreenShot {
         preferCurrentTab: curTabState
       });
       // 将MediaStream输出至video标签
-      this.videoController.srcObject = captureStream;
+      componentDomStore.setVideoSrcObject(captureStream);
       // 储存屏幕流数据
       this.captureStream = captureStream;
     } catch (err) {
@@ -495,11 +497,12 @@ export default class ScreenShot {
 
   // 停止捕捉屏幕
   private stopCapture = () => {
-    const srcObject = this.videoController.srcObject;
+    if (componentDomStore.videoController == null) return;
+    const srcObject = componentDomStore.videoController.srcObject;
     if (srcObject && "getTracks" in srcObject) {
       const tracks = srcObject.getTracks();
       tracks.forEach(track => track.stop());
-      this.videoController.srcObject = null;
+      componentDomStore.setVideoSrcObject(null);
     }
   };
 
@@ -905,8 +908,8 @@ export default class ScreenShot {
     videoCanvas.width = videoWidth;
     videoCanvas.height = videoHeight;
     const videoContext = getCanvas2dCtx(videoCanvas, videoWidth, videoHeight);
-    if (videoContext) {
-      videoContext.drawImage(this.videoController, 0, 0);
+    if (videoContext && componentDomStore.videoController) {
+      videoContext.drawImage(componentDomStore.videoController, 0, 0);
       const startX = 0;
       const startY = videoHeight - containerHeight;
       const width = containerWidth;
