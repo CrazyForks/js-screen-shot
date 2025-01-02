@@ -36,8 +36,8 @@ class UserParamStore {
 
   enableWebRtc: boolean = this.initialState().enableWebRtc;
   screenFlow: MediaStream | null = this.initialState().screenFlow;
-  canvasWidth: number = this.initialState().canvasWidth;
-  canvasHeight: number = this.initialState().canvasHeight;
+  private canvasWidth: number = this.initialState().canvasWidth;
+  private canvasHeight: number = this.initialState().canvasHeight;
   showScreenData: boolean = this.initialState().showScreenData;
   screenShotDom: HTMLElement | null = this.initialState().screenShotDom;
   destroyContainer: boolean = this.initialState().destroyContainer;
