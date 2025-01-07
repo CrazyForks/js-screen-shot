@@ -1,20 +1,40 @@
 import { makeAutoObservable } from "mobx";
 import {
-  customToolbarType,
   mouseEventType,
   screenShotType,
+  UserParamStoreDataType,
   userToolbarType
 } from "@/lib/type/ComponentType";
 
 class UserParamStore {
-  private initialState() {
+  private initialState(): UserParamStoreDataType {
     return {
       enableWebRtc: true,
-      screenFlow: null as MediaStream | null,
+      clickCutFullScreen: false,
+      imgSrc: null,
+      loadCrossImg: false,
+      proxyUrl: undefined,
+      useCORS: false,
+      h2cIgnoreElementsFn: () => false,
+      position: { left: 0, top: 0 },
+      wrcReplyTime: 500,
+      cropBoxInfo: null,
+      toolPosition: "center",
+      wrcImgPosition: { x: 0, y: 0, w: 0, h: 0 },
+      hiddenScrollBar: {
+        color: "#000000",
+        fillState: false,
+        state: false,
+        fillWidth: 0,
+        fillHeight: 0
+      },
+      wrcWindowMode: false,
+      customRightClickEvent: { state: false },
+      screenFlow: null,
       canvasWidth: 0,
       canvasHeight: 0,
       showScreenData: false,
-      screenShotDom: null as HTMLElement | null,
+      screenShotDom: null,
       destroyContainer: true,
       maskColor: { r: 0, g: 0, b: 0, a: 0.6 },
       writeBase64: true,
@@ -24,45 +44,49 @@ class UserParamStore {
       imgAutoFit: false,
       useCustomImgSize: false,
       customImgSize: { w: 0, h: 0 },
-      userToolbar: [] as Array<customToolbarType>,
-      h2cCrossImgLoadErrFn: null as
-        | screenShotType["h2cImgLoadErrCallback"]
-        | null,
-      saveCallback: null as ((code: number, msg: string) => void) | null,
-      saveImgTitle: null as string | null,
-      canvasEvents: null as mouseEventType | null
+      userToolbar: [],
+      h2cCrossImgLoadErrFn: null,
+      saveCallback: null,
+      saveImgTitle: null,
+      canvasEvents: null
     };
   }
 
-  enableWebRtc: boolean = this.initialState().enableWebRtc;
-  screenFlow: MediaStream | null = this.initialState().screenFlow;
-  private canvasWidth: number = this.initialState().canvasWidth;
-  private canvasHeight: number = this.initialState().canvasHeight;
-  showScreenData: boolean = this.initialState().showScreenData;
-  screenShotDom: HTMLElement | null = this.initialState().screenShotDom;
-  destroyContainer: boolean = this.initialState().destroyContainer;
-  maskColor: {
-    r: number;
-    g: number;
-    b: number;
-    a: number;
-  } = this.initialState().maskColor;
-  writeBase64: boolean = this.initialState().writeBase64;
-  cutBoxBdColor: string = this.initialState().cutBoxBdColor;
-  maxUndoNum: number = this.initialState().maxUndoNum;
-  useRatioArrow: boolean = this.initialState().useRatioArrow;
-  imgAutoFit: boolean = this.initialState().imgAutoFit;
-  useCustomImgSize: boolean = this.initialState().useCustomImgSize;
-  customImgSize: { w: number; h: number } = this.initialState().customImgSize;
-  userToolbar: Array<customToolbarType> = this.initialState().userToolbar;
-  h2cCrossImgLoadErrFn:
-    | screenShotType["h2cImgLoadErrCallback"]
-    | null = this.initialState().h2cCrossImgLoadErrFn;
-  saveCallback:
-    | ((code: number, msg: string) => void)
-    | null = this.initialState().saveCallback;
-  saveImgTitle: string | null = this.initialState().saveImgTitle;
-  canvasEvents: mouseEventType | null = this.initialState().canvasEvents;
+  enableWebRtc = this.initialState().enableWebRtc;
+  clickCutFullScreen = this.initialState().clickCutFullScreen;
+  imgSrc = this.initialState().imgSrc;
+  loadCrossImg = this.initialState().loadCrossImg;
+  proxyUrl = this.initialState().proxyUrl;
+  useCORS = this.initialState().useCORS;
+  h2cIgnoreElementsFn = this.initialState().h2cIgnoreElementsFn;
+  // 截图容器位置信息
+  position = this.initialState().position;
+  wrcReplyTime = this.initialState().wrcReplyTime;
+  cropBoxInfo = this.initialState().cropBoxInfo;
+  toolPosition = this.initialState().toolPosition;
+  wrcImgPosition = this.initialState().wrcImgPosition;
+  hiddenScrollBar = this.initialState().hiddenScrollBar;
+  wrcWindowMode: boolean = this.initialState().wrcWindowMode;
+  customRightClickEvent = this.initialState().customRightClickEvent;
+  screenFlow = this.initialState().screenFlow;
+  private canvasWidth = this.initialState().canvasWidth;
+  private canvasHeight = this.initialState().canvasHeight;
+  showScreenData = this.initialState().showScreenData;
+  screenShotDom = this.initialState().screenShotDom;
+  destroyContainer = this.initialState().destroyContainer;
+  maskColor = this.initialState().maskColor;
+  writeBase64 = this.initialState().writeBase64;
+  cutBoxBdColor = this.initialState().cutBoxBdColor;
+  maxUndoNum = this.initialState().maxUndoNum;
+  useRatioArrow = this.initialState().useRatioArrow;
+  imgAutoFit = this.initialState().imgAutoFit;
+  useCustomImgSize = this.initialState().useCustomImgSize;
+  customImgSize = this.initialState().customImgSize;
+  userToolbar = this.initialState().userToolbar;
+  h2cCrossImgLoadErrFn = this.initialState().h2cCrossImgLoadErrFn;
+  saveCallback = this.initialState().saveCallback;
+  saveImgTitle = this.initialState().saveImgTitle;
+  canvasEvents = this.initialState().canvasEvents;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -71,6 +95,71 @@ class UserParamStore {
   // 设置 WebRTC 启用状态
   setWebRtcStatus(status: boolean) {
     this.enableWebRtc = status;
+  }
+
+  // 设置单击截全屏模式启用状态
+  setClickCutFullScreenStatus(status: boolean) {
+    this.clickCutFullScreen = status;
+  }
+
+  // 用户传入的图像内容
+  setImgSrc(src: string) {
+    this.imgSrc = src;
+  }
+
+  setLoadCrossImg(val: boolean) {
+    this.loadCrossImg = val;
+  }
+
+  setProxyUrl(url: string) {
+    this.proxyUrl = url;
+  }
+
+  setUseCORS(state: boolean) {
+    this.useCORS = state;
+  }
+
+  setH2cIgnoreElementsFn(
+    callback: UserParamStoreDataType["h2cIgnoreElementsFn"]
+  ) {
+    this.h2cIgnoreElementsFn = callback;
+  }
+
+  setPosition(top: number, left: number) {
+    this.position = {
+      top,
+      left
+    };
+  }
+
+  setWrcReplyTime(time: number) {
+    this.wrcReplyTime = time;
+  }
+
+  setCropBoxInfo(info: UserParamStoreDataType["cropBoxInfo"]) {
+    this.cropBoxInfo = info;
+  }
+
+  setToolPosition(toolPosition: UserParamStoreDataType["toolPosition"]) {
+    this.toolPosition = toolPosition;
+  }
+
+  setWrcImgPosition(imgPosition: UserParamStoreDataType["wrcImgPosition"]) {
+    this.wrcImgPosition = imgPosition;
+  }
+
+  setHiddenScrollBar(barInfo: UserParamStoreDataType["hiddenScrollBar"]) {
+    this.hiddenScrollBar = barInfo;
+  }
+
+  setWrcWindowMode(windowInfo: boolean) {
+    this.wrcWindowMode = windowInfo;
+  }
+
+  setCustomRightClickEvent(
+    data: UserParamStoreDataType["customRightClickEvent"]
+  ) {
+    this.customRightClickEvent = data;
   }
 
   // 设置截图 DOM
@@ -165,13 +254,10 @@ class UserParamStore {
 
   // 设置用户工具栏
   setUserToolbar(toolbar: Array<userToolbarType>) {
-    const toolbarData: Array<customToolbarType> = toolbar.map(
-      (item, index) => ({
-        ...item,
-        id: 100 + (index + 1)
-      })
-    );
-    this.userToolbar = toolbarData;
+    this.userToolbar = toolbar.map((item, index) => ({
+      ...item,
+      id: 100 + (index + 1)
+    }));
   }
 
   // 设置图片加载错误回调函数

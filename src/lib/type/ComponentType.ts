@@ -173,3 +173,51 @@ export type screenShotType = {
   canvasEvents?: mouseEventType; // 截图画布的事件监听
   h2cIgnoreElementsCallback?: (element: Element) => boolean; // html2canvas模式需要忽略的元素回调
 };
+
+export type UserParamStoreDataType = {
+  enableWebRtc: boolean;
+  clickCutFullScreen: boolean;
+  imgSrc: string | null;
+  loadCrossImg: boolean;
+  proxyUrl: string | undefined;
+  useCORS: boolean;
+  h2cIgnoreElementsFn: (element: Element) => boolean;
+  position: { left: number; top: number };
+  wrcReplyTime: number;
+  cropBoxInfo: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null;
+  toolPosition: toolPositionValType;
+  wrcImgPosition: { x: number; y: number; w: number; h: number };
+  hiddenScrollBar: {
+    color: string;
+    fillState: boolean;
+    state: boolean;
+    fillWidth: number;
+    fillHeight: number;
+  };
+  wrcWindowMode: boolean;
+  customRightClickEvent: crcEventType;
+  screenFlow: MediaStream | null;
+  canvasWidth: number;
+  canvasHeight: number;
+  showScreenData: boolean;
+  screenShotDom: HTMLElement | null;
+  destroyContainer: boolean;
+  maskColor: { r: number; g: number; b: number; a: number };
+  writeBase64: boolean;
+  cutBoxBdColor: string;
+  maxUndoNum: number;
+  useRatioArrow: boolean;
+  imgAutoFit: boolean;
+  useCustomImgSize: boolean;
+  customImgSize: { w: number; h: number };
+  userToolbar: Array<customToolbarType>;
+  h2cCrossImgLoadErrFn: screenShotType["h2cImgLoadErrCallback"] | null;
+  saveCallback: ((code: number, msg: string) => void) | null;
+  saveImgTitle: string | null;
+  canvasEvents: mouseEventType | null;
+};

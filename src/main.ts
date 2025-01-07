@@ -2,7 +2,6 @@ import CreateDom from "@/lib/main-entrance/CreateDom";
 // 导入截图所需样式
 import "@/assets/scss/screen-shot.scss";
 import {
-  crcEventType,
   cutOutBoxBorder,
   drawCutOutBoxReturnType,
   movePositionType,
@@ -42,15 +41,11 @@ import textInputStore from "@/store/TextInputStore";
 import componentDomStore from "@/store/ComponentDomStore";
 import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
 import userParamStore from "@/store/UserParamStore";
+import { setOptionalParameter } from "@/lib/split-methods/SetOptionalParameter";
 
 export default class ScreenShot {
   // 截图区域canvas容器
   private screenShotContainer: HTMLCanvasElement | null | undefined;
-  private screenShotDom:
-    | HTMLElement
-    | HTMLDivElement
-    | HTMLCanvasElement
-    | null = null;
   // 截图工具栏dom
   private toolController: HTMLDivElement | null | undefined;
   // 截图图片存放容器
@@ -64,7 +59,6 @@ export default class ScreenShot {
   private optionIcoController: HTMLDivElement | null | undefined;
   private cutBoxSizeContainer: HTMLDivElement | null | undefined;
 
-  private wrcReplyTime = 500;
   private keyboardEventHandle: null | KeyboardEventHandle = null;
   // 图形位置参数
   private drawGraphPosition: positionInfoType = {
@@ -80,16 +74,6 @@ export default class ScreenShot {
     width: 0,
     height: 0
   };
-  private wrcImgPosition = { x: 0, y: 0, w: 0, h: 0 };
-  // 是否隐藏页面滚动条
-  private hiddenScrollBar = {
-    color: "#000000",
-    fillState: false,
-    state: false,
-    fillWidth: 0,
-    fillHeight: 0
-  };
-  private wrcWindowMode = false;
   // 裁剪框边框节点坐标事件
   private cutOutBoxBorderArr: Array<cutOutBoxBorder> = [];
   // 当前操作的边框节点
@@ -103,8 +87,7 @@ export default class ScreenShot {
 
   // 鼠标拖动状态
   private dragFlag = false;
-  // 单击截取屏启用状态
-  private clickCutFullScreen = false;
+
   // 全屏截取状态
   private getFullScreenStatus = false;
   // 上一个裁剪框坐标信息
@@ -115,24 +98,13 @@ export default class ScreenShot {
   private dpr = window.devicePixelRatio || 1;
   // 截全屏时工具栏展示的位置要减去的高度
   private fullScreenDiffHeight = 60;
-  // 截图容器位置信息
-  private position: { top: number; left: number } = { left: 0, top: 0 };
-  private imgSrc: string | null = null;
-  private loadCrossImg = false;
+
   // 鼠标是否在裁剪框内
   private mouseInsideCropBox = false;
-  private proxyUrl: undefined | string = undefined;
-  private h2cIgnoreElementsFn: (element: Element) => boolean = () => false;
-  private useCORS = false;
+
   private drawStatus = false;
   // webrtc模式下的屏幕流数据
   private captureStream: MediaStream | null = null;
-  private cropBoxInfo: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  } | null = null;
 
   // 文本输入框位置
   private textInputPosition: { mouseX: number; mouseY: number } = {
@@ -143,9 +115,6 @@ export default class ScreenShot {
   private placement: toolPositionValType = "center";
   // 递增变粗箭头的实现
   private drawArrow = new DrawArrow();
-  private customRightClickEvent: crcEventType = {
-    state: false
-  };
 
   constructor(options: screenShotType) {
     // 提取调用者传入的配置
@@ -157,7 +126,7 @@ export default class ScreenShot {
     this.screenShotImageController = document.createElement("canvas");
 
     // 设置插件的可选参数
-    this.setOptionalParameter(options);
+    setOptionalParameter(options);
     // 获取截图区域canvas容器(获取的同时也会为InitData中的全局变量赋值)
     this.setGlobalParameter();
     // 修改截图容器可滚动状态
@@ -182,7 +151,7 @@ export default class ScreenShot {
     );
     // 给输入容器设置快捷键监听
     this.registerContainerShortcuts(this.textInputController);
-    if (this.customRightClickEvent.state) {
+    if (userParamStore.customRightClickEvent.state) {
       // 给截图容器添加右键事件监听
       this.registerForRightClickEvent(this.screenShotContainer);
     }
@@ -210,8 +179,8 @@ export default class ScreenShot {
     container.addEventListener("contextmenu", e => {
       e.preventDefault();
       // 调用者传入了自定义事件则执行
-      if (this.customRightClickEvent.handleFn) {
-        this.customRightClickEvent.handleFn();
+      if (userParamStore.customRightClickEvent.handleFn) {
+        userParamStore.customRightClickEvent.handleFn();
         return;
       }
       // 销毁组件
@@ -233,8 +202,8 @@ export default class ScreenShot {
     screenShotCanvasStore.setScreenShotInfo(viewSize.width, viewSize.height);
     // 设置截图容器位置
     screenShotCanvasStore.setScreenShotPosition(
-      this.position.left,
-      this.position.top
+      userParamStore.position.left,
+      userParamStore.position.top
     );
     // 设置截图图片存放容器宽高
     this.screenShotImageController.width = viewSize.width;
@@ -260,18 +229,23 @@ export default class ScreenShot {
     screenShotCanvasStore.showScreenShotPanel();
     if (!userParamStore.enableWebRtc) {
       // 判断用户是否自己传入截屏图片
-      if (this.imgSrc != null) {
-        this.drawPictures(triggerCallback, context, this.imgSrc);
+      if (userParamStore.imgSrc != null) {
+        this.drawPictures(triggerCallback, context, userParamStore.imgSrc);
         return;
       }
 
       // html2canvas截屏
-      html2canvas(this.screenShotDom ? this.screenShotDom : document.body, {
-        onclone: this.loadCrossImg ? drawCrossImg : undefined,
-        proxy: this.proxyUrl,
-        ignoreElements: this.h2cIgnoreElementsFn,
-        useCORS: this.useCORS
-      })
+      html2canvas(
+        userParamStore.screenShotDom
+          ? userParamStore.screenShotDom
+          : document.body,
+        {
+          onclone: userParamStore.loadCrossImg ? drawCrossImg : undefined,
+          proxy: userParamStore.proxyUrl,
+          ignoreElements: userParamStore.h2cIgnoreElementsFn,
+          useCORS: userParamStore.useCORS
+        }
+      )
         .then(canvas => {
           // 装载截图的dom为null则退出
           if (this.screenShotContainer == null) return;
@@ -340,7 +314,7 @@ export default class ScreenShot {
       }
       let imgContainerWidth = containerWidth;
       let imgContainerHeight = containerHeight;
-      if (this.wrcWindowMode) {
+      if (userParamStore.wrcWindowMode) {
         imgContainerWidth = containerWidth * this.dpr;
         imgContainerHeight = containerHeight * this.dpr;
       }
@@ -363,7 +337,7 @@ export default class ScreenShot {
       // 赋值截图区域canvas画布
       this.screenShotCanvas = context;
       const { videoWidth, videoHeight } = componentDomStore.videoController;
-      if (this.wrcWindowMode) {
+      if (userParamStore.wrcWindowMode) {
         // 从窗口视频流中获取body内容
         const bodyImgData = this.getWindowContentData(
           videoWidth,
@@ -383,35 +357,40 @@ export default class ScreenShot {
           fixHeight = containerHeight;
         }
         // 对视频容器的内容进行裁剪
-        fixWidth = this.wrcImgPosition.w > 0 ? this.wrcImgPosition.w : fixWidth;
+        fixWidth =
+          userParamStore.wrcImgPosition.w > 0
+            ? userParamStore.wrcImgPosition.w
+            : fixWidth;
         fixHeight =
-          this.wrcImgPosition.h > 0 ? this.wrcImgPosition.h : fixHeight;
+          userParamStore.wrcImgPosition.h > 0
+            ? userParamStore.wrcImgPosition.h
+            : fixHeight;
         imgContext?.drawImage(
           componentDomStore.videoController,
-          this.wrcImgPosition.x,
-          this.wrcImgPosition.y,
+          userParamStore.wrcImgPosition.x,
+          userParamStore.wrcImgPosition.y,
           fixWidth,
           fixHeight
         );
         // 隐藏滚动条会出现部分内容未截取到，需要进行修复
         const diffHeight = containerHeight - fixHeight;
         if (
-          this.hiddenScrollBar.state &&
+          userParamStore.hiddenScrollBar.state &&
           diffHeight > 0 &&
-          this.hiddenScrollBar.fillState
+          userParamStore.hiddenScrollBar.fillState
         ) {
           // 填充容器的剩余部分
           imgContext.beginPath();
           let fillWidth = containerWidth;
           let fillHeight = diffHeight;
-          if (this.hiddenScrollBar.fillWidth > 0) {
-            fillWidth = this.hiddenScrollBar.fillWidth;
+          if (userParamStore.hiddenScrollBar.fillWidth > 0) {
+            fillWidth = userParamStore.hiddenScrollBar.fillWidth;
           }
-          if (this.hiddenScrollBar.fillHeight > 0) {
-            fillHeight = this.hiddenScrollBar.fillHeight;
+          if (userParamStore.hiddenScrollBar.fillHeight > 0) {
+            fillHeight = userParamStore.hiddenScrollBar.fillHeight;
           }
           imgContext.rect(0, fixHeight, fillWidth, fillHeight);
-          imgContext.fillStyle = this.hiddenScrollBar.color;
+          imgContext.fillStyle = userParamStore.hiddenScrollBar.color;
           imgContext.fill();
         }
       }
@@ -440,7 +419,7 @@ export default class ScreenShot {
       this.stopCapture();
       // 重置光标状态
       document.body.classList.remove("no-cursor");
-    }, this.wrcReplyTime);
+    }, userParamStore.wrcReplyTime);
   }
 
   // 开始捕捉屏幕
@@ -451,7 +430,7 @@ export default class ScreenShot {
     let curTabState = true;
     let displayConfig = {};
     // 窗口模式启用时则
-    if (this.wrcWindowMode) {
+    if (userParamStore.wrcWindowMode) {
       mediaWidth = window.screen.width * this.dpr;
       mediaHeight = window.screen.height * this.dpr;
       curTabState = false;
@@ -612,7 +591,7 @@ export default class ScreenShot {
         addHistory();
       }
       // 计算文本框显示位置, 需要加上截图容器的位置信息
-      const textMouseX = mouseX + this.position.left;
+      const textMouseX = mouseX + userParamStore.position.left;
       // 设置文本框位置等信息
       this.textInputController.style.left = textMouseX + "px";
       this.textInputController.style.fontSize = toolBarStore.fontSize + "px";
@@ -627,7 +606,9 @@ export default class ScreenShot {
           // 输入框容器y轴的位置需要在坐标的基础上再加上容器高度的一半，容器的位置就正好居中于光标
           // canvas渲染的时候就不会出现位置不一致的问题了
           const textMouseY =
-            mouseY - Math.floor(containerHeight / 2) + this.position.top;
+            mouseY -
+            Math.floor(containerHeight / 2) +
+            userParamStore.position.top;
           this.textInputController.style.top = textMouseY + "px";
           // 获取焦点
           this.textInputController.focus();
@@ -968,7 +949,7 @@ export default class ScreenShot {
       this.toolController.offsetWidth,
       this.screenShotContainer.width / this.dpr,
       this.placement,
-      this.position
+      userParamStore.position
     );
     const containerHeight = this.screenShotContainer.height / this.dpr;
 
@@ -1000,8 +981,8 @@ export default class ScreenShot {
 
     // 显示并设置截图工具栏位置
     toolBarStore.setToolInfo(
-      toolLocation.mouseX + this.position.left,
-      toolLocation.mouseY + this.position.top
+      toolLocation.mouseX + userParamStore.position.left,
+      toolLocation.mouseY + userParamStore.position.top
     );
 
     // 设置裁剪框尺寸显示容器位置
@@ -1028,93 +1009,6 @@ export default class ScreenShot {
     this.cutBoxSizeContainer = cropBoxStore.getCutBoxSizeContainer() as HTMLDivElement | null;
   }
 
-  private setOptionalParameter(options: screenShotType) {
-    // 单击截取全屏启用状态,默认为false
-    if (options?.clickCutFullScreen === true) {
-      this.clickCutFullScreen = true;
-    }
-    // 判断调用者是否传了截图进来
-    if (options?.imgSrc != null) {
-      this.imgSrc = options.imgSrc;
-    }
-    // 是否加载跨域图片
-    if (options?.loadCrossImg === true) {
-      this.loadCrossImg = true;
-    }
-    // 跨域时的代理服务器地址
-    if (options?.proxyUrl) {
-      this.proxyUrl = options.proxyUrl;
-    }
-    if (options?.useCORS) {
-      this.useCORS = options.useCORS;
-    }
-    if (options?.h2cIgnoreElementsCallback) {
-      this.h2cIgnoreElementsFn = options.h2cIgnoreElementsCallback;
-    }
-    // 设置截图容器的位置信息
-    if (options?.position != null) {
-      if (options.position?.top != null) {
-        this.position.top = options.position.top;
-      }
-      if (options.position?.left != null) {
-        this.position.left = options.position.left;
-      }
-    }
-    // 截图容器dom
-    if (options?.screenShotDom) {
-      this.screenShotDom = options.screenShotDom;
-    }
-    // webrtc截图等待时间
-    if (options?.wrcReplyTime) {
-      this.wrcReplyTime = options.wrcReplyTime;
-    }
-    // 是否初始化裁剪框
-    if (options?.cropBoxInfo) {
-      this.cropBoxInfo = options.cropBoxInfo;
-    }
-    // 是否需要更改工具栏的展示位置
-    if (options?.toolPosition) {
-      this.placement = options.toolPosition;
-    }
-    // 是否需要对webrtc模式下捕获到的内容进行裁剪
-    if (options?.wrcImgPosition) {
-      const { x, y } = options.wrcImgPosition;
-      // 坐标需要取负数才能正确的裁剪
-      this.wrcImgPosition.x = Math.abs(x) * -1;
-      this.wrcImgPosition.y = Math.abs(y) * -1;
-    }
-    // 是否隐藏滚动条
-    if (options?.hiddenScrollBar != null) {
-      const {
-        state,
-        color,
-        fillWidth,
-        fillHeight,
-        fillState
-      } = options.hiddenScrollBar;
-      this.hiddenScrollBar = {
-        state,
-        color: color ? color : "#000000",
-        fillWidth: fillWidth ? fillWidth : 0,
-        fillHeight: fillHeight ? fillHeight : 0,
-        fillState: fillState ? fillState : false
-      };
-      if (state) {
-        componentDomStore.setResetScrollbarState(true);
-        // 设置页面宽高并隐藏滚动条
-        document.documentElement.classList.add("hidden-screen-shot-scroll");
-        document.body.classList.add("hidden-screen-shot-scroll");
-      }
-    }
-    // 是否启用窗口截图模式
-    if (options?.wrcWindowMode != null) {
-      this.wrcWindowMode = options.wrcWindowMode;
-    }
-    if (options?.customRightClickEvent != null) {
-      this.customRightClickEvent = options.customRightClickEvent;
-    }
-  }
-
   // 鼠标抬起事件
   private mouseUpEvent = () => {
     // 当前操作的是撤销
@@ -1131,7 +1025,7 @@ export default class ScreenShot {
     if (
       !toolBarStore.toolClickStatus &&
       !this.dragFlag &&
-      !this.clickCutFullScreen
+      !userParamStore.clickCutFullScreen
     ) {
       // 复原裁剪框的坐标
       this.drawGraphPosition.startX = this.drawGraphPrevX;
@@ -1150,7 +1044,7 @@ export default class ScreenShot {
       cutBoxPosition.startX === 0 &&
       cutBoxPosition.startY === 0 &&
       !this.dragFlag &&
-      this.clickCutFullScreen
+      userParamStore.clickCutFullScreen
     ) {
       const borderSize = cropBoxStore.borderSize;
       this.getFullScreenStatus = true;
@@ -1196,7 +1090,7 @@ export default class ScreenShot {
     // 鼠标按下且拖动时重新渲染工具栏
     if (
       (this.screenShotContainer != null && this.dragFlag) ||
-      this.clickCutFullScreen
+      userParamStore.clickCutFullScreen
     ) {
       // 修改鼠标状态为拖动
       this.screenShotContainer.style.cursor = "move";
@@ -1492,8 +1386,11 @@ export default class ScreenShot {
     // 截图容器添加鼠标点击/触摸事件的监听
     this.setScreenShotContainerEventListener();
     // 是否初始化裁剪框
-    if (this.cropBoxInfo != null && Object.keys(this.cropBoxInfo).length == 4) {
-      this.initCropBox(this.cropBoxInfo);
+    if (
+      userParamStore.cropBoxInfo != null &&
+      Object.keys(userParamStore.cropBoxInfo).length == 4
+    ) {
+      this.initCropBox(userParamStore.cropBoxInfo);
     }
   }
 
