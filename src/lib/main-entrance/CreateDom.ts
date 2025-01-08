@@ -25,6 +25,7 @@ import {
 
 import toolBarStore from "@/store/ToolBarStore";
 import userParamStore from "@/store/UserParamStore";
+import { saveData } from "@/lib/split-methods/SaveData";
 
 export default class CreateDom {
   // 截图区域canvas容器
@@ -94,7 +95,8 @@ export default class CreateDom {
         base64: string;
         cutInfo: positionInfoType;
       }) => {
-        sessionStorage.setItem("screenShotImg", JSON.stringify(imgInfo));
+        // 将数据写入session或者IndexedDB
+        saveData(imgInfo, "screenShotImg");
       };
     }
 
