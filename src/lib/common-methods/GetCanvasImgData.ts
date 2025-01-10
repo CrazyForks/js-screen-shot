@@ -3,14 +3,15 @@ import { saveCanvasToBase64 } from "@/lib/common-methods/SaveCanvasToBase64";
 
 import cropBoxStore from "@/store/CropBoxStore";
 import userParamStore from "@/store/UserParamStore";
+import componentDomStore from "@/store/ComponentDomStore";
 
 /**
  * 将指定区域的canvas转为图片
  */
 export function getCanvasImgData(isSave: boolean) {
-  const screenShotCanvas = cropBoxStore
-    .getScreenShotContainer()
-    ?.getContext("2d");
+  const screenShotCanvas = componentDomStore.screenShotController?.getContext(
+    "2d"
+  );
   // 获取裁剪区域位置信息
   const { startX, startY, width, height } = cropBoxStore.cutOutBoxPosition;
   let base64 = "";

@@ -44,20 +44,10 @@ import userParamStore from "@/store/UserParamStore";
 import { setOptionalParameter } from "@/lib/split-methods/SetOptionalParameter";
 
 export default class ScreenShot {
-  // 截图区域canvas容器
-  private screenShotContainer: HTMLCanvasElement | null | undefined;
-  // 截图工具栏dom
-  private toolController: HTMLDivElement | null | undefined;
   // 截图图片存放容器
   private screenShotImageController: HTMLCanvasElement;
   // 截图区域画布
   private screenShotCanvas: CanvasRenderingContext2D | undefined;
-  // 文本区域dom
-  private textInputController: HTMLDivElement | null | undefined;
-  // 截图工具栏画笔选项dom
-  private optionController: HTMLDivElement | null | undefined;
-  private optionIcoController: HTMLDivElement | null | undefined;
-  private cutBoxSizeContainer: HTMLDivElement | null | undefined;
 
   private keyboardEventHandle: null | KeyboardEventHandle = null;
   // 图形位置参数
@@ -127,17 +117,17 @@ export default class ScreenShot {
 
     // 设置插件的可选参数
     setOptionalParameter(options);
-    // 获取截图区域canvas容器(获取的同时也会为InitData中的全局变量赋值)
-    this.setGlobalParameter();
+    // 获取截图区域canvas容器，存储到store中
+    componentDomStore.setCanvasContainer();
     // 修改截图容器可滚动状态
     componentDomStore.setNoScrollStatus(options?.noScroll);
 
     // 加载截图组件
     this.load(options?.triggerCallback, options?.cancelCallback);
     if (
-      this.toolController == null ||
-      this.screenShotContainer == null ||
-      this.textInputController == null
+      componentDomStore.toolController == null ||
+      componentDomStore.screenShotController == null ||
+      componentDomStore.textInputController == null
     ) {
       return;
     }
@@ -146,20 +136,15 @@ export default class ScreenShot {
 
     // 创建键盘事件监听
     this.keyboardEventHandle = new KeyboardEventHandle(
-      this.screenShotContainer,
-      this.toolController
+      componentDomStore.screenShotController,
+      componentDomStore.toolController
     );
     // 给输入容器设置快捷键监听
-    this.registerContainerShortcuts(this.textInputController);
+    this.registerContainerShortcuts(componentDomStore.textInputController);
     if (userParamStore.customRightClickEvent.state) {
       // 给截图容器添加右键事件监听
-      this.registerForRightClickEvent(this.screenShotContainer);
+      this.registerForRightClickEvent(componentDomStore.screenShotController);
     }
-  }
-
-  // 获取截图区域canvas容器
-  public getCanvasController(): HTMLCanvasElement | null | undefined {
-    return this.screenShotContainer;
   }
 
   // 销毁组件方法
@@ -218,9 +203,9 @@ export default class ScreenShot {
       this.screenShotImageController.height = canvasSize.canvasHeight;
     }
     // 获取截图区域canvas容器画布
-    if (this.screenShotContainer == null) return;
+    if (componentDomStore.screenShotController == null) return;
     const context = getCanvas2dCtx(
-      this.screenShotContainer,
+      componentDomStore.screenShotController,
       this.screenShotImageController.width,
       this.screenShotImageController.height
     );
@@ -248,7 +233,7 @@ export default class ScreenShot {
       )
         .then(canvas => {
           // 装载截图的dom为null则退出
-          if (this.screenShotContainer == null) return;
+          if (componentDomStore.screenShotController == null) return;
 
           // 存储html2canvas截取的内容
           this.screenShotImageController = canvas;
@@ -303,7 +288,7 @@ export default class ScreenShot {
   private loadScreenFlowData(triggerCallback: Function | undefined) {
     setTimeout(() => {
       // 获取截图区域canvas容器画布
-      if (this.screenShotContainer == null) return;
+      if (componentDomStore.screenShotController == null) return;
       const canvasSize = userParamStore.getCanvasSize();
       let containerWidth = this.screenShotImageController?.width;
       let containerHeight = this.screenShotImageController?.height;
@@ -319,7 +304,7 @@ export default class ScreenShot {
         imgContainerHeight = containerHeight * this.dpr;
       }
       const context = getCanvas2dCtx(
-        this.screenShotContainer,
+        componentDomStore.screenShotController,
         containerWidth,
         containerHeight
       );
@@ -554,8 +539,8 @@ export default class ScreenShot {
     // 当前操作的文本
     if (
       toolBarStore.toolName == "text" &&
-      this.textInputController &&
-      this.screenShotContainer &&
+      componentDomStore.textInputController &&
+      componentDomStore.screenShotController &&
       this.screenShotCanvas
     ) {
       if (!this.mouseInsideCropBox) {
@@ -571,7 +556,7 @@ export default class ScreenShot {
         this.textInputPosition.mouseY != mouseY
       ) {
         drawText(
-          this.textInputController.innerText,
+          componentDomStore.textInputController.innerText,
           this.textInputPosition.mouseX,
           this.textInputPosition.mouseY,
           toolBarStore.selectedColor,
@@ -580,38 +565,41 @@ export default class ScreenShot {
         );
 
         // 输入框内容不为空时则隐藏
-        if (this.textInputController.innerText !== "") {
+        if (componentDomStore.textInputController.innerText !== "") {
           // 隐藏输入框
           textInputStore.setTextStatus(false);
         }
 
         // 清空文本输入区域的内容
-        this.textInputController.innerHTML = "";
+        componentDomStore.textInputController.innerHTML = "";
         // 保存绘制记录
         addHistory();
       }
       // 计算文本框显示位置, 需要加上截图容器的位置信息
       const textMouseX = mouseX + userParamStore.position.left;
       // 设置文本框位置等信息
-      this.textInputController.style.left = textMouseX + "px";
-      this.textInputController.style.fontSize = toolBarStore.fontSize + "px";
-      this.textInputController.style.fontFamily = "none";
-      this.textInputController.style.color = toolBarStore.selectedColor;
+      componentDomStore.textInputController.style.left = textMouseX + "px";
+      componentDomStore.textInputController.style.fontSize =
+        toolBarStore.fontSize + "px";
+      componentDomStore.textInputController.style.fontFamily = "none";
+      componentDomStore.textInputController.style.color =
+        toolBarStore.selectedColor;
 
       // 部分操作需要等dom渲染完毕执行
       setTimeout(() => {
-        if (this.textInputController) {
+        if (componentDomStore.textInputController) {
           // 获取输入框容器的高度
-          const containerHeight = this.textInputController.offsetHeight;
+          const containerHeight =
+            componentDomStore.textInputController.offsetHeight;
           // 输入框容器y轴的位置需要在坐标的基础上再加上容器高度的一半，容器的位置就正好居中于光标
           // canvas渲染的时候就不会出现位置不一致的问题了
           const textMouseY =
             mouseY -
             Math.floor(containerHeight / 2) +
             userParamStore.position.top;
-          this.textInputController.style.top = textMouseY + "px";
+          componentDomStore.textInputController.style.top = textMouseY + "px";
           // 获取焦点
-          this.textInputController.focus();
+          componentDomStore.textInputController.focus();
           // 记录当前输入框位置
           this.textInputPosition = { mouseX: mouseX, mouseY: mouseY };
           toolBarStore.setTextInfo({
@@ -645,7 +633,7 @@ export default class ScreenShot {
   private mouseMoveEvent = (event: MouseEvent | TouchEvent) => {
     if (
       this.screenShotCanvas == null ||
-      this.screenShotContainer == null ||
+      componentDomStore.screenShotController == null ||
       toolBarStore.toolName == "undo"
     ) {
       return;
@@ -804,7 +792,7 @@ export default class ScreenShot {
       tempHeight,
       this.screenShotCanvas,
       cropBoxStore.borderSize,
-      this.screenShotContainer,
+      componentDomStore.screenShotController,
       this.screenShotImageController
     ) as drawCutOutBoxReturnType;
   };
@@ -812,22 +800,22 @@ export default class ScreenShot {
   // 调整插件容器层级
   private adjustContainerLevels(level: number): void {
     if (
-      this.screenShotContainer == null ||
-      this.toolController == null ||
-      this.textInputController == null ||
-      this.optionIcoController == null ||
-      this.optionController == null ||
-      this.cutBoxSizeContainer == null ||
+      componentDomStore.screenShotController == null ||
+      componentDomStore.toolController == null ||
+      componentDomStore.textInputController == null ||
+      componentDomStore.optionIcoController == null ||
+      componentDomStore.optionController == null ||
+      componentDomStore.cutBoxSizeContainer == null ||
       level <= 0
     ) {
       return;
     }
-    this.screenShotContainer.style.zIndex = `${level}`;
-    this.toolController.style.zIndex = `${level + 1}`;
-    this.textInputController.style.zIndex = `${level + 1}`;
-    this.optionIcoController.style.zIndex = `${level + 1}`;
-    this.optionController.style.zIndex = `${level + 1}`;
-    this.cutBoxSizeContainer.style.zIndex = `${level + 1}`;
+    componentDomStore.screenShotController.style.zIndex = `${level}`;
+    componentDomStore.toolController.style.zIndex = `${level + 1}`;
+    componentDomStore.textInputController.style.zIndex = `${level + 1}`;
+    componentDomStore.optionIcoController.style.zIndex = `${level + 1}`;
+    componentDomStore.optionController.style.zIndex = `${level + 1}`;
+    componentDomStore.cutBoxSizeContainer.style.zIndex = `${level + 1}`;
   }
 
   // 初始化裁剪框
@@ -841,7 +829,7 @@ export default class ScreenShot {
     const startY = cropBoxInfo.y;
     const width = cropBoxInfo.w;
     const height = cropBoxInfo.h;
-    if (this.screenShotContainer == null) return;
+    if (componentDomStore.screenShotController == null) return;
     this.drawGraphPosition = { startX, startY, width, height };
     cropBoxStore.setCutOutBoxPosition(startX, startY, width, height);
     drawCutOutBox(
@@ -851,7 +839,7 @@ export default class ScreenShot {
       height,
       this.screenShotCanvas as CanvasRenderingContext2D,
       cropBoxStore.borderSize,
-      this.screenShotContainer,
+      componentDomStore.screenShotController,
       this.screenShotImageController
     );
     // 保存边框节点信息
@@ -860,12 +848,12 @@ export default class ScreenShot {
       this.drawGraphPosition
     );
     // 修改鼠标状态为拖动
-    this.screenShotContainer.style.cursor = "move";
+    componentDomStore.screenShotController.style.cursor = "move";
     // 显示截图工具栏
     toolBarStore.setToolStatus(true);
     // 显示裁剪框尺寸显示容器
     cropBoxStore.setCutBoxSizeStatus(true);
-    if (this.toolController != null) {
+    if (componentDomStore.toolController != null) {
       // 渲染截图工具栏
       this.showToolBar();
     }
@@ -942,23 +930,30 @@ export default class ScreenShot {
   }
 
   private showToolBar(): void {
-    if (this.toolController == null || this.screenShotContainer == null) return;
+    if (
+      componentDomStore.toolController == null ||
+      componentDomStore.screenShotController == null
+    )
+      return;
     // 计算截图工具栏位置
     const toolLocation = calculateToolLocation(
       this.drawGraphPosition,
-      this.toolController.offsetWidth,
-      this.screenShotContainer.width / this.dpr,
+      componentDomStore.toolController.offsetWidth,
+      componentDomStore.screenShotController.width / this.dpr,
       this.placement,
       userParamStore.position
     );
-    const containerHeight = this.screenShotContainer.height / this.dpr;
+    const containerHeight =
+      componentDomStore.screenShotController.height / this.dpr;
 
     // 工具栏的位置超出截图容器时，调整工具栏位置防止超出
     if (toolLocation.mouseY > containerHeight - 64) {
       toolLocation.mouseY -= this.drawGraphPosition.height + 64;
       // 超出屏幕顶部时
       if (toolLocation.mouseY < 0) {
-        const containerHeight = parseInt(this.screenShotContainer.style.height);
+        const containerHeight = parseInt(
+          componentDomStore.screenShotController.style.height
+        );
         toolLocation.mouseY = containerHeight - this.fullScreenDiffHeight;
       }
       // 设置工具栏超出状态为true
@@ -969,11 +964,13 @@ export default class ScreenShot {
 
     // 当前截取的是全屏，则修改工具栏的位置到截图容器最底部，防止超出
     if (this.getFullScreenStatus) {
-      const containerHeight = parseInt(this.screenShotContainer.style.height);
+      const containerHeight = parseInt(
+        componentDomStore.screenShotController.style.height
+      );
       // 重新计算工具栏的x轴位置
       const toolPositionX =
         (this.drawGraphPosition.width / this.dpr -
-          this.toolController.offsetWidth) /
+          componentDomStore.toolController.offsetWidth) /
         2;
       toolLocation.mouseY = containerHeight - this.fullScreenDiffHeight;
       toolLocation.mouseX = toolPositionX;
@@ -1000,15 +997,6 @@ export default class ScreenShot {
     this.getFullScreenStatus = false;
   }
 
-  private setGlobalParameter() {
-    this.screenShotContainer = cropBoxStore.getScreenShotContainer() as HTMLCanvasElement | null;
-    this.toolController = toolBarStore.getToolController() as HTMLDivElement | null;
-    this.textInputController = textInputStore.getTextInputController() as HTMLDivElement | null;
-    this.optionController = toolBarStore.getOptionController() as HTMLDivElement | null;
-    this.optionIcoController = toolBarStore.getOptionIcoController() as HTMLDivElement | null;
-    this.cutBoxSizeContainer = cropBoxStore.getCutBoxSizeContainer() as HTMLDivElement | null;
-  }
-
   // 鼠标抬起事件
   private mouseUpEvent = () => {
     // 当前操作的是撤销
@@ -1018,7 +1006,10 @@ export default class ScreenShot {
     cropBoxStore.setDraggingTrim(false);
 
     // 截图容器判空
-    if (this.screenShotCanvas == null || this.screenShotContainer == null) {
+    if (
+      this.screenShotCanvas == null ||
+      componentDomStore.screenShotController == null
+    ) {
       return;
     }
     // 工具栏未点击且鼠标未拖动且单击截屏状态为false则复原裁剪框位置
@@ -1052,16 +1043,19 @@ export default class ScreenShot {
       this.tempGraphPosition = drawCutOutBox(
         0,
         0,
-        this.screenShotContainer.width - borderSize / 2,
-        this.screenShotContainer.height - borderSize / 2,
+        componentDomStore.screenShotController.width - borderSize / 2,
+        componentDomStore.screenShotController.height - borderSize / 2,
         this.screenShotCanvas,
         borderSize,
-        this.screenShotContainer,
+        componentDomStore.screenShotController,
         this.screenShotImageController
       ) as drawCutOutBoxReturnType;
     }
 
-    if (this.screenShotContainer == null || this.screenShotCanvas == null) {
+    if (
+      componentDomStore.screenShotController == null ||
+      this.screenShotCanvas == null
+    ) {
       return;
     }
     // 工具栏已点击且进行了绘制
@@ -1089,18 +1083,18 @@ export default class ScreenShot {
     );
     // 鼠标按下且拖动时重新渲染工具栏
     if (
-      (this.screenShotContainer != null && this.dragFlag) ||
+      (componentDomStore.screenShotController != null && this.dragFlag) ||
       userParamStore.clickCutFullScreen
     ) {
       // 修改鼠标状态为拖动
-      this.screenShotContainer.style.cursor = "move";
+      componentDomStore.screenShotController.style.cursor = "move";
       // 显示截图工具栏
       toolBarStore.setToolStatus(true);
       // 显示裁剪框尺寸显示容器
       cropBoxStore.setCutBoxSizeStatus(true);
       // 复原拖动状态
       this.dragFlag = false;
-      if (this.toolController != null) {
+      if (componentDomStore.toolController != null) {
         this.showToolBar();
       }
     }
@@ -1127,7 +1121,7 @@ export default class ScreenShot {
     context: CanvasRenderingContext2D
   ) {
     // canvas元素不存在
-    if (this.screenShotContainer == null) {
+    if (componentDomStore.screenShotController == null) {
       return;
     }
     // 获取鼠标按下时的坐标
@@ -1153,29 +1147,31 @@ export default class ScreenShot {
               if (toolBarStore.toolClickStatus) {
                 // 修改截图容器内的鼠标样式
                 updateContainerMouseStyle(
-                  this.screenShotContainer,
+                  componentDomStore.screenShotController,
                   toolBarStore.activeTool
                 );
               } else {
-                this.screenShotContainer.style.cursor = "move";
+                componentDomStore.screenShotController.style.cursor = "move";
               }
               break;
             case 2:
               // 工具栏被点击则不改变指针样式
               if (toolBarStore.toolClickStatus) break;
-              this.screenShotContainer.style.cursor = "ns-resize";
+              componentDomStore.screenShotController.style.cursor = "ns-resize";
               break;
             case 3:
               if (toolBarStore.toolClickStatus) break;
-              this.screenShotContainer.style.cursor = "ew-resize";
+              componentDomStore.screenShotController.style.cursor = "ew-resize";
               break;
             case 4:
               if (toolBarStore.toolClickStatus) break;
-              this.screenShotContainer.style.cursor = "nwse-resize";
+              componentDomStore.screenShotController.style.cursor =
+                "nwse-resize";
               break;
             case 5:
               if (toolBarStore.toolClickStatus) break;
-              this.screenShotContainer.style.cursor = "nesw-resize";
+              componentDomStore.screenShotController.style.cursor =
+                "nesw-resize";
               break;
             default:
               break;
@@ -1189,7 +1185,7 @@ export default class ScreenShot {
       context.closePath();
       if (!flag) {
         // 鼠标移出裁剪框重置鼠标样式
-        this.screenShotContainer.style.cursor = "default";
+        componentDomStore.screenShotController.style.cursor = "default";
         // 重置当前操作的边框节点为null
         this.borderOption = null;
       }
@@ -1203,17 +1199,19 @@ export default class ScreenShot {
         let x = fixedData(
           currentX - (moveStartX - startX),
           width,
-          this.screenShotContainer.width
+          componentDomStore.screenShotController.width
         );
         // 计算要移动的y轴坐标
         let y = fixedData(
           currentY - (moveStartY - startY),
           height,
-          this.screenShotContainer.height
+          componentDomStore.screenShotController.height
         );
         // 计算画布面积
-        const containerWidth = this.screenShotContainer.width / this.dpr;
-        const containerHeight = this.screenShotContainer.height / this.dpr;
+        const containerWidth =
+          componentDomStore.screenShotController.width / this.dpr;
+        const containerHeight =
+          componentDomStore.screenShotController.height / this.dpr;
         // 计算裁剪框在画布上所占的面积
         const cutOutBoxSizeX = x + width;
         const cutOutBoxSizeY = y + height;
@@ -1233,7 +1231,7 @@ export default class ScreenShot {
           height,
           context,
           cropBoxStore.borderSize,
-          this.screenShotContainer as HTMLCanvasElement,
+          componentDomStore.screenShotController as HTMLCanvasElement,
           this.screenShotImageController
         ) as drawCutOutBoxReturnType;
       } else {
@@ -1260,7 +1258,7 @@ export default class ScreenShot {
           tempHeight,
           context,
           cropBoxStore.borderSize,
-          this.screenShotContainer as HTMLCanvasElement,
+          componentDomStore.screenShotController as HTMLCanvasElement,
           this.screenShotImageController
         ) as drawCutOutBoxReturnType;
       }
@@ -1289,30 +1287,33 @@ export default class ScreenShot {
   private setScreenShotContainerEventListener() {
     if (isPC()) {
       // 添加鼠标事件监听
-      this.screenShotContainer?.addEventListener(
+      componentDomStore.screenShotController?.addEventListener(
         "mousedown",
         this.mouseDownEvent
       );
-      this.screenShotContainer?.addEventListener(
+      componentDomStore.screenShotController?.addEventListener(
         "mousemove",
         this.mouseMoveEvent
       );
-      this.screenShotContainer?.addEventListener("mouseup", this.mouseUpEvent);
+      componentDomStore.screenShotController?.addEventListener(
+        "mouseup",
+        this.mouseUpEvent
+      );
     }
     // 设备不支持触摸事件则退出
     if (!isTouchDevice()) return;
     // 设置触摸监听
-    this.screenShotContainer?.addEventListener(
+    componentDomStore.screenShotController?.addEventListener(
       "touchstart",
       this.mouseDownEvent,
       false
     );
-    this.screenShotContainer?.addEventListener(
+    componentDomStore.screenShotController?.addEventListener(
       "touchmove",
       this.mouseMoveEvent,
       false
     );
-    this.screenShotContainer?.addEventListener(
+    componentDomStore.screenShotController?.addEventListener(
       "touchend",
       this.mouseUpEvent,
       false
@@ -1339,7 +1340,7 @@ export default class ScreenShot {
     imgContainer.crossOrigin = "Anonymous";
     imgContainer.onload = () => {
       // 装载截图的dom为null则退出
-      if (this.screenShotContainer == null) return;
+      if (componentDomStore.screenShotController == null) return;
 
       // 将用户传递的图片绘制到图片容器里
       this.screenShotImageController

@@ -1,10 +1,10 @@
-import cropBoxStore from "@/store/CropBoxStore";
 import toolBarStore from "@/store/ToolBarStore";
 import userParamStore from "@/store/UserParamStore";
+import componentDomStore from "@/store/ComponentDomStore";
 
 // 保存当前画布状态
 export function addHistory() {
-  const screenShotController = cropBoxStore.getScreenShotContainer();
+  const screenShotController = componentDomStore.screenShotController;
   if (screenShotController == null) return;
   // 获取canvas容器
   // 获取canvas画布与容器

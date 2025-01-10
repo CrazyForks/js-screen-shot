@@ -53,22 +53,6 @@ class CropBoxStore {
     };
   }
 
-  // 获取裁剪框尺寸显示容器
-  getCutBoxSizeContainer() {
-    componentDomStore.cutBoxSizeContainer = document.getElementById(
-      "cutBoxSizePanel"
-    ) as HTMLDivElement | null;
-    return componentDomStore.cutBoxSizeContainer;
-  }
-
-  // 获取截图容器dom
-  getScreenShotContainer() {
-    componentDomStore.screenShotController = document.getElementById(
-      "screenShotContainer"
-    ) as HTMLCanvasElement | null;
-    return componentDomStore.screenShotController;
-  }
-
   // 设置裁剪框尺寸显示容器展示状态
   setCutBoxSizeStatus(status: boolean) {
     if (componentDomStore.cutBoxSizeContainer == null) return;

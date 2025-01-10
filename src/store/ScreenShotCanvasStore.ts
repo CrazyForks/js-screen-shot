@@ -1,6 +1,5 @@
 import { makeAutoObservable } from "mobx";
 import componentDomStore from "@/store/ComponentDomStore";
-import cropBoxStore from "@/store/CropBoxStore";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
 
 class ScreenShotCanvasStore {
@@ -20,7 +19,6 @@ class ScreenShotCanvasStore {
 
   // 设置截图容器宽高
   setScreenShotInfo(width: number, height: number) {
-    cropBoxStore.getScreenShotContainer();
     if (componentDomStore.screenShotController == null) return;
     // 增加截图锁屏
     if (componentDomStore.noScrollStatus) {
@@ -32,7 +30,6 @@ class ScreenShotCanvasStore {
 
   // 设置截图容器位置
   setScreenShotPosition(left: number, top: number) {
-    cropBoxStore.getScreenShotContainer();
     if (componentDomStore.screenShotController == null) return;
     const { left: rLeft, top: rTop } = getToolRelativePosition(left, top);
     componentDomStore.screenShotController.style.left = `${rLeft}px`;
@@ -41,7 +38,6 @@ class ScreenShotCanvasStore {
 
   // 显示截图区域容器
   showScreenShotPanel() {
-    cropBoxStore.getScreenShotContainer();
     if (componentDomStore.screenShotController == null) return;
     componentDomStore.screenShotController.style.display = "block";
   }

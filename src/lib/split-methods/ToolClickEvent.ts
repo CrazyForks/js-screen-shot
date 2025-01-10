@@ -17,8 +17,8 @@ import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
 import userParamStore from "@/store/UserParamStore";
 
 function getToolbarContainer() {
-  const textInputController = textInputStore.getTextInputController();
-  const screenShotController = cropBoxStore.getScreenShotContainer();
+  const textInputController = componentDomStore.textInputController;
+  const screenShotController = componentDomStore.screenShotController;
   const ScreenShotImageController = screenShotCanvasStore.imageController;
   if (screenShotController == null || ScreenShotImageController == null)
     return null;
@@ -38,7 +38,7 @@ function hideTextInput(
   toolName: string,
   screenShotCanvas: CanvasRenderingContext2D
 ) {
-  const textInputController = textInputStore.getTextInputController();
+  const textInputController = componentDomStore.textInputController;
   if (textInputController != null && toolName !== "text") {
     const text = textInputController.innerText;
     if (text && text !== "") {

@@ -6,14 +6,6 @@ class TextInputStore {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  // 获取文本输入区域dom
-  getTextInputController() {
-    componentDomStore.textInputController = document.getElementById(
-      "textInputPanel"
-    ) as HTMLDivElement | null;
-    return componentDomStore.textInputController;
-  }
-
   private getTextSizeContainer() {
     componentDomStore.textSizeContainer = document.getElementById(
       "textSizePanel"
@@ -30,7 +22,6 @@ class TextInputStore {
 
   // 设置文本输入工具栏展示状态
   setTextStatus(status: boolean) {
-    this.getTextInputController();
     if (componentDomStore.textInputController == null) return;
     if (status) {
       // 显示文本输入工具

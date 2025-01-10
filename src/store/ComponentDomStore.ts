@@ -120,6 +120,28 @@ class ComponentDomStore {
     componentDomStore.videoController.autoplay = true;
   }
 
+  // 从dom中获取截图所需的canvas容器并设置到store中
+  setCanvasContainer() {
+    this.screenShotController = document.getElementById(
+      "screenShotContainer"
+    ) as HTMLCanvasElement | null;
+    this.toolController = document.getElementById(
+      "toolPanel"
+    ) as HTMLDivElement | null;
+    this.textInputController = document.getElementById(
+      "textInputPanel"
+    ) as HTMLDivElement | null;
+    this.optionController = document.getElementById(
+      "optionPanel"
+    ) as HTMLDivElement | null;
+    this.optionIcoController = document.getElementById(
+      "optionIcoController"
+    ) as HTMLDivElement | null;
+    this.cutBoxSizeContainer = document.getElementById(
+      "cutBoxSizePanel"
+    ) as HTMLDivElement | null;
+  }
+
   setVideoSrcObject(videoSrcObject: MediaStream | null) {
     if (this.videoController == null) return;
     this.videoController.srcObject = videoSrcObject;

@@ -1,14 +1,14 @@
 /**
  * 取出一条历史记录
  */
-import cropBoxStore from "@/store/CropBoxStore";
 import toolBarStore from "@/store/ToolBarStore";
+import componentDomStore from "@/store/ComponentDomStore";
 
 export function takeOutHistory() {
   toolBarStore.popHistory();
-  const screenShortCanvas = cropBoxStore
-    .getScreenShotContainer()
-    ?.getContext("2d");
+  const screenShortCanvas = componentDomStore.screenShotController?.getContext(
+    "2d"
+  );
   if (screenShortCanvas != null) {
     if (toolBarStore.history.length > 0) {
       screenShortCanvas.putImageData(

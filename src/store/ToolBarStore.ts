@@ -51,29 +51,6 @@ class ToolBarStore {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  // 获取工具栏 DOM 控制器
-  getToolController() {
-    componentDomStore.toolController = document.getElementById(
-      "toolPanel"
-    ) as HTMLDivElement | null;
-    return componentDomStore.toolController;
-  }
-
-  getOptionController() {
-    componentDomStore.optionController = document.getElementById(
-      "optionPanel"
-    ) as HTMLDivElement | null;
-    return componentDomStore.optionController;
-  }
-
-  // 获取截图工具栏画笔选择工具 DOM
-  getOptionIcoController() {
-    componentDomStore.optionIcoController = document.getElementById(
-      "optionIcoController"
-    ) as HTMLDivElement | null;
-    return componentDomStore.optionIcoController;
-  }
-
   getColorSelectPanel() {
     componentDomStore.colorSelectPanel = document.getElementById(
       "colorSelectPanel"
@@ -83,15 +60,12 @@ class ToolBarStore {
 
   // 设置截图工具栏展示状态
   setToolStatus(status: boolean) {
-    // 获取一次最新的工具栏 DOM
-    this.getToolController();
     if (componentDomStore.toolController == null) return;
     componentDomStore.toolController.style.display = status ? "block" : "none";
   }
 
   // 设置截图工具位置信息
   setToolInfo(left: number, top: number) {
-    this.getToolController();
     if (componentDomStore.toolController == null) return;
     const { left: rLeft, top: rTop } = getToolRelativePosition(left, top);
     componentDomStore.toolController.style.left = `${rLeft}px`;
@@ -104,7 +78,6 @@ class ToolBarStore {
 
   // 获取工具栏位置
   getToolPosition() {
-    this.getToolController();
     if (componentDomStore.toolController == null) return;
     return {
       left: componentDomStore.toolController.offsetLeft,
@@ -138,9 +111,6 @@ class ToolBarStore {
 
   // 设置选项状态
   setOptionStatus(status: boolean) {
-    // 获取截图工具栏与三角形角标容器
-    this.getOptionIcoController();
-    this.getOptionController();
     if (
       componentDomStore.optionIcoController == null ||
       componentDomStore.optionController == null
@@ -156,16 +126,12 @@ class ToolBarStore {
 
   // 隐藏画笔工具栏三角形角标
   hiddenOptionIcoStatus() {
-    this.getOptionIcoController();
     if (componentDomStore.optionIcoController == null) return;
     componentDomStore.optionIcoController.style.display = "none";
   }
 
   // 设置画笔选择工具栏位置
   setOptionPosition(position: number) {
-    // 获取截图工具栏与三角形角标容器
-    this.getOptionIcoController();
-    this.getOptionController();
     if (
       componentDomStore.optionIcoController == null ||
       componentDomStore.optionController == null
