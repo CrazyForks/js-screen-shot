@@ -29,7 +29,18 @@ class DrawingDataStore {
         startY: 0,
         width: 0,
         height: 0
-      } as positionInfoType
+      } as positionInfoType,
+      // 文本输入框位置
+      textInputPosition: {
+        mouseX: 0,
+        mouseY: 0
+      } as { mouseX: number; mouseY: number },
+      // 上一个裁剪框坐标信息
+      drawGraphPrevX: 0,
+      drawGraphPrevY: 0,
+      drawStatus: false,
+      // 马赛克涂抹区域大小
+      degreeOfBlur: 5
     };
   }
 
@@ -41,6 +52,11 @@ class DrawingDataStore {
   borderOption = this.initialState().borderOption;
   mouseInsideCropBox = this.initialState().mouseInsideCropBox;
   tempGraphPosition = this.initialState().tempGraphPosition;
+  textInputPosition = this.initialState().textInputPosition;
+  drawGraphPrevX = this.initialState().drawGraphPrevX;
+  drawGraphPrevY = this.initialState().drawGraphPrevY;
+  drawStatus = this.initialState().drawStatus;
+  degreeOfBlur = this.initialState().degreeOfBlur;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -89,6 +105,22 @@ class DrawingDataStore {
       width,
       height
     };
+  }
+
+  updateTextInputPosition(mouseX: number, mouseY: number) {
+    this.textInputPosition = {
+      mouseX,
+      mouseY
+    };
+  }
+
+  updateDrawGraphPrevInfo(x: number, y: number) {
+    this.drawGraphPrevX = x;
+    this.drawGraphPrevY = y;
+  }
+
+  updateDrawStatus(status: boolean) {
+    this.drawStatus = status;
   }
 
   // 重置状态

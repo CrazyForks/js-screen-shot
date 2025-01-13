@@ -691,6 +691,50 @@ const h2cScreenShot = (
   });
 };
 
+// 调整插件容器层级
+const adjustContainerLevels = (level: number) => {
+  if (
+    componentDomStore.screenShotController == null ||
+    componentDomStore.toolController == null ||
+    componentDomStore.textInputController == null ||
+    componentDomStore.optionIcoController == null ||
+    componentDomStore.optionController == null ||
+    componentDomStore.cutBoxSizeContainer == null ||
+    level <= 0
+  ) {
+    return;
+  }
+  componentDomStore.screenShotController.style.zIndex = `${level}`;
+  componentDomStore.toolController.style.zIndex = `${level + 1}`;
+  componentDomStore.textInputController.style.zIndex = `${level + 1}`;
+  componentDomStore.optionIcoController.style.zIndex = `${level + 1}`;
+  componentDomStore.optionController.style.zIndex = `${level + 1}`;
+  componentDomStore.cutBoxSizeContainer.style.zIndex = `${level + 1}`;
+};
+
+/**
+ * 显示最新的画布状态
+ */
+const showCanvasLastHistory = () => {
+  if (screenShotCanvasStore.screenShotCanvas != null) {
+    const context = screenShotCanvasStore.screenShotCanvas;
+    if (toolBarStore.history.length <= 0) {
+      addHistory();
+    }
+    context.putImageData(
+      toolBarStore.history[toolBarStore.history.length - 1]["data"],
+      0,
+      0
+    );
+  }
+};
+
+// 判断当前工具栏是否为自定义工具栏
+const isCustomTool = () => {
+  const toolId = toolBarStore.toolId;
+  return toolId && toolId > 100;
+};
+
 export {
   registerForRightClickEvent,
   getWindowContentData,
@@ -702,5 +746,8 @@ export {
   h2cScreenShot,
   loadScreenFlowData,
   wrcScreenShot,
-  sendStream
+  sendStream,
+  adjustContainerLevels,
+  showCanvasLastHistory,
+  isCustomTool
 };
