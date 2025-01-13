@@ -5,13 +5,16 @@ import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePos
 class ScreenShotCanvasStore {
   private initialState() {
     return {
-      imageController: null as HTMLCanvasElement | null
+      imageController: null as HTMLCanvasElement | null,
+      screenShotCanvas: null as CanvasRenderingContext2D | null
     };
   }
 
   // 存储获取到的屏幕截图
   imageController: HTMLCanvasElement | null = this.initialState()
     .imageController;
+  screenShotCanvas: CanvasRenderingContext2D | null = this.initialState()
+    .screenShotCanvas;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -26,6 +29,10 @@ class ScreenShotCanvasStore {
     }
     componentDomStore.screenShotController.width = width;
     componentDomStore.screenShotController.height = height;
+  }
+
+  updateScreenShotCanvas(screenShotCanvas: CanvasRenderingContext2D) {
+    this.screenShotCanvas = screenShotCanvas;
   }
 
   // 设置截图容器位置

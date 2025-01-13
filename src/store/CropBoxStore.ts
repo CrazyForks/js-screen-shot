@@ -14,6 +14,12 @@ class CropBoxStore {
         startY: 0,
         width: 0,
         height: 0
+      } as positionInfoType,
+      drawGraphPosition: {
+        startX: 0,
+        startY: 0,
+        width: 0,
+        height: 0
       } as positionInfoType
     };
   }
@@ -23,6 +29,7 @@ class CropBoxStore {
   dragging: boolean = this.initialState().dragging;
   borderSize: number = this.initialState().borderSize;
   cutOutBoxPosition: positionInfoType = this.initialState().cutOutBoxPosition;
+  drawGraphPosition: positionInfoType = this.initialState().drawGraphPosition;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -89,6 +96,35 @@ class CropBoxStore {
     const textPanel = document.createElement("p");
     textPanel.innerText = `${width} * ${height}`;
     componentDomStore.cutBoxSizeContainer.appendChild(textPanel);
+  }
+
+  updateDrawGraphPosition(
+    mouseX?: number,
+    mouseY?: number,
+    width?: number,
+    height?: number
+  ) {
+    // 创建 updates 对象，用于保存传入的参数值
+    const updates: Record<string, number | undefined> = {
+      mouseX,
+      mouseY,
+      width,
+      height
+    };
+    // 创建映射对象，将传入的参数名称映射到 drawGraphPosition 对象的属性名称
+    const mapping: Record<string, keyof typeof this.drawGraphPosition> = {
+      mouseX: "startX",
+      mouseY: "startY",
+      width: "width",
+      height: "height"
+    };
+
+    // 遍历 updates 对象，对每一个非 undefined 的值进行更新
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value !== undefined) {
+        this.drawGraphPosition[mapping[key as keyof typeof mapping]] = value;
+      }
+    });
   }
 
   // 重置状态

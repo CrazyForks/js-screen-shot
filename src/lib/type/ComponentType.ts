@@ -221,3 +221,9 @@ export type UserParamStoreDataType = {
   saveImgTitle: string | null;
   canvasEvents: mouseEventType | null;
 };
+
+export type mouseEventFnType = {
+  mouseDownEvent: (event: MouseEvent | TouchEvent) => void;
+  mouseMoveEvent: (event: MouseEvent | TouchEvent) => void;
+  mouseUpEvent: () => void;
+};
