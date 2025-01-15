@@ -1,20 +1,20 @@
 import { makeAutoObservable } from "mobx";
 import componentDomStore from "@/store/ComponentDomStore";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
-import { textInfoType } from "@/lib/type/ComponentType";
+import { textInfoType, ToolBarStoreDataType } from "@/lib/type/ComponentType";
 import { takeOutHistory } from "@/lib/common-methods/TakeOutHistory";
 
 class ToolBarStore {
-  private initialState() {
+  private initialState(): ToolBarStoreDataType {
     return {
       toolClickStatus: false,
       selectedColor: "#F53340",
       toolName: "",
-      toolId: null as number | null,
+      toolId: null,
       penSize: 2,
       fontSize: 17,
       mosaicPenSize: 10,
-      history: [] as Array<Record<string, any>>,
+      history: [],
       toolPositionStatus: false,
       activeTool: "",
       textEditState: false,
@@ -23,7 +23,7 @@ class ToolBarStore {
         positionY: 0,
         color: "#000000",
         size: 0
-      } as textInfoType
+      }
     };
   }
 

@@ -1,12 +1,13 @@
 import { makeAutoObservable } from "mobx";
 import componentDomStore from "@/store/ComponentDomStore";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
+import { ScreenShotCanvasStoreDataType } from "@/lib/type/ComponentType";
 
 class ScreenShotCanvasStore {
-  private initialState() {
+  private initialState(): ScreenShotCanvasStoreDataType {
     return {
-      imageController: null as HTMLCanvasElement | null,
-      screenShotCanvas: null as CanvasRenderingContext2D | null
+      imageController: null,
+      screenShotCanvas: null
     };
   }
 

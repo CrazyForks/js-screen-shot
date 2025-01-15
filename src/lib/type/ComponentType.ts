@@ -174,6 +174,69 @@ export type screenShotType = {
   h2cIgnoreElementsCallback?: (element: Element) => boolean; // html2canvas模式需要忽略的元素回调
 };
 
+export type ComponentDomStoreDataType = {
+  screenShotController: HTMLCanvasElement | null;
+  toolController: HTMLDivElement | null;
+  optionIcoController: HTMLDivElement | null;
+  optionController: HTMLDivElement | null;
+  cutBoxSizeContainer: HTMLDivElement | null;
+  textInputController: HTMLDivElement | null;
+  colorSelectPanel: HTMLElement | null;
+  textSizeContainer: HTMLDivElement | null;
+  optionTextSizeController: HTMLDivElement | null;
+  brushSelectionController: HTMLDivElement | null;
+  colorSelectController: HTMLElement | null;
+  rightPanel: HTMLElement | null;
+  undoController: HTMLElement | null;
+  videoController: HTMLVideoElement | null;
+  noScrollStatus: boolean;
+  resetScrollbarState: boolean;
+};
+
+export type CropBoxStoreDataType = {
+  draggingTrim: boolean;
+  dragging: boolean;
+  borderSize: number;
+  cutOutBoxPosition: positionInfoType;
+  drawGraphPosition: positionInfoType;
+};
+
+export type DrawingStoreDataType = {
+  dpr: number;
+  getFullScreenStatus: boolean;
+  cutOutBoxBorderArr: Array<cutOutBoxBorder>;
+  captureStream: MediaStream | null;
+  movePosition: movePositionType;
+  borderOption: number | null;
+  mouseInsideCropBox: boolean;
+  tempGraphPosition: positionInfoType;
+  textInputPosition: { mouseX: number; mouseY: number };
+  drawGraphPrevX: number;
+  drawGraphPrevY: number;
+  drawStatus: boolean;
+  degreeOfBlur: number;
+};
+
+export type ScreenShotCanvasStoreDataType = {
+  imageController: HTMLCanvasElement | null;
+  screenShotCanvas: CanvasRenderingContext2D | null;
+};
+
+export type ToolBarStoreDataType = {
+  toolClickStatus: boolean;
+  selectedColor: string;
+  toolName: string;
+  toolId: number | null;
+  penSize: number;
+  fontSize: number;
+  mosaicPenSize: number;
+  history: Array<Record<string, any>>;
+  toolPositionStatus: boolean;
+  activeTool: string;
+  textEditState: boolean;
+  textInfo: textInfoType;
+};
+
 export type UserParamStoreDataType = {
   enableWebRtc: boolean;
   clickCutFullScreen: boolean;

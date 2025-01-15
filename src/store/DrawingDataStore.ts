@@ -1,40 +1,39 @@
 import { makeAutoObservable } from "mobx";
 import {
   cutOutBoxBorder,
-  movePositionType,
-  positionInfoType
+  DrawingStoreDataType
 } from "@/lib/type/ComponentType";
 
 class DrawingDataStore {
-  private initialState() {
+  private initialState(): DrawingStoreDataType {
     return {
       dpr: window.devicePixelRatio || 1,
       getFullScreenStatus: false,
       // 裁剪框边框节点坐标事件
-      cutOutBoxBorderArr: [] as Array<cutOutBoxBorder>,
+      cutOutBoxBorderArr: [],
       // webrtc模式下的屏幕流数据
-      captureStream: null as MediaStream | null,
+      captureStream: null,
       // 点击裁剪框时的鼠标坐标
       movePosition: {
         moveStartX: 0,
         moveStartY: 0
-      } as movePositionType,
+      },
       // 当前操作的边框节点
-      borderOption: null as number | null,
+      borderOption: null,
       // 鼠标是否在裁剪框内
-      mouseInsideCropBox: false as boolean,
+      mouseInsideCropBox: false,
       // 临时图形位置参数
       tempGraphPosition: {
         startX: 0,
         startY: 0,
         width: 0,
         height: 0
-      } as positionInfoType,
+      },
       // 文本输入框位置
       textInputPosition: {
         mouseX: 0,
         mouseY: 0
-      } as { mouseX: number; mouseY: number },
+      },
       // 上一个裁剪框坐标信息
       drawGraphPrevX: 0,
       drawGraphPrevY: 0,

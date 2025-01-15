@@ -3,60 +3,51 @@ import cropBoxStore from "@/store/CropBoxStore";
 import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
 import toolBarStore from "@/store/ToolBarStore";
 import userParamStore from "@/store/UserParamStore";
+import { ComponentDomStoreDataType } from "@/lib/type/ComponentType";
 
 class ComponentDomStore {
   // 初始状态封装对象
-  private initialState() {
+  private initialState(): ComponentDomStoreDataType {
     return {
-      screenShotController: null as HTMLCanvasElement | null,
-      toolController: null as HTMLDivElement | null,
-      optionIcoController: null as HTMLDivElement | null,
-      optionController: null as HTMLDivElement | null,
-      cutBoxSizeContainer: null as HTMLDivElement | null,
-      textInputController: null as HTMLDivElement | null,
-      colorSelectPanel: null as HTMLElement | null,
-      textSizeContainer: null as HTMLDivElement | null,
-      optionTextSizeController: null as HTMLDivElement | null,
-      brushSelectionController: null as HTMLDivElement | null,
-      colorSelectController: null as HTMLElement | null,
-      rightPanel: null as HTMLElement | null,
-      undoController: null as HTMLElement | null,
-      videoController: null as HTMLVideoElement | null,
+      screenShotController: null,
+      toolController: null,
+      optionIcoController: null,
+      optionController: null,
+      cutBoxSizeContainer: null,
+      textInputController: null,
+      colorSelectPanel: null,
+      textSizeContainer: null,
+      optionTextSizeController: null,
+      brushSelectionController: null,
+      colorSelectController: null,
+      rightPanel: null,
+      undoController: null,
+      videoController: null,
       noScrollStatus: false,
       resetScrollbarState: false
     };
   }
 
   // 可观察属性
-  screenShotController: HTMLCanvasElement | null = this.initialState()
-    .screenShotController;
-  toolController: HTMLDivElement | null = this.initialState().toolController;
-  optionIcoController: HTMLDivElement | null = this.initialState()
-    .optionIcoController;
-  optionController: HTMLDivElement | null = this.initialState()
-    .optionController;
-  cutBoxSizeContainer: HTMLDivElement | null = this.initialState()
-    .cutBoxSizeContainer;
-  textInputController: HTMLDivElement | null = this.initialState()
-    .textInputController;
-  colorSelectPanel: HTMLElement | null = this.initialState().colorSelectPanel;
-  textSizeContainer: HTMLDivElement | null = this.initialState()
-    .textSizeContainer;
-  optionTextSizeController: HTMLDivElement | null = this.initialState()
-    .optionTextSizeController;
-  brushSelectionController: HTMLDivElement | null = this.initialState()
-    .brushSelectionController;
-  colorSelectController: HTMLElement | null = this.initialState()
-    .colorSelectController;
-  rightPanel: HTMLElement | null = this.initialState().rightPanel;
-  undoController: HTMLElement | null = this.initialState().undoController;
-  videoController: HTMLVideoElement | null = this.initialState()
-    .videoController;
+  screenShotController = this.initialState().screenShotController;
+  toolController = this.initialState().toolController;
+  optionIcoController = this.initialState().optionIcoController;
+  optionController = this.initialState().optionController;
+  cutBoxSizeContainer = this.initialState().cutBoxSizeContainer;
+  textInputController = this.initialState().textInputController;
+  colorSelectPanel = this.initialState().colorSelectPanel;
+  textSizeContainer = this.initialState().textSizeContainer;
+  optionTextSizeController = this.initialState().optionTextSizeController;
+  brushSelectionController = this.initialState().brushSelectionController;
+  colorSelectController = this.initialState().colorSelectController;
+  rightPanel = this.initialState().rightPanel;
+  undoController = this.initialState().undoController;
+  videoController = this.initialState().videoController;
 
   // 截图容器是否可滚动
-  noScrollStatus: boolean = this.initialState().noScrollStatus;
+  noScrollStatus = this.initialState().noScrollStatus;
   // 是否需要还原页面的滚动条状态
-  resetScrollbarState: boolean = this.initialState().resetScrollbarState;
+  resetScrollbarState = this.initialState().resetScrollbarState;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });

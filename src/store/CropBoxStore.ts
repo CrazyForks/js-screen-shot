@@ -1,10 +1,10 @@
 import { makeAutoObservable } from "mobx";
-import { positionInfoType } from "@/lib/type/ComponentType";
+import { CropBoxStoreDataType } from "@/lib/type/ComponentType";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
 import componentDomStore from "@/store/ComponentDomStore";
 
 class CropBoxStore {
-  private initialState() {
+  private initialState(): CropBoxStoreDataType {
     return {
       draggingTrim: false,
       dragging: false,
@@ -14,22 +14,22 @@ class CropBoxStore {
         startY: 0,
         width: 0,
         height: 0
-      } as positionInfoType,
+      },
       drawGraphPosition: {
         startX: 0,
         startY: 0,
         width: 0,
         height: 0
-      } as positionInfoType
+      }
     };
   }
 
   // 可观察属性
-  draggingTrim: boolean = this.initialState().draggingTrim;
-  dragging: boolean = this.initialState().dragging;
-  borderSize: number = this.initialState().borderSize;
-  cutOutBoxPosition: positionInfoType = this.initialState().cutOutBoxPosition;
-  drawGraphPosition: positionInfoType = this.initialState().drawGraphPosition;
+  draggingTrim = this.initialState().draggingTrim;
+  dragging = this.initialState().dragging;
+  borderSize = this.initialState().borderSize;
+  cutOutBoxPosition = this.initialState().cutOutBoxPosition;
+  drawGraphPosition = this.initialState().drawGraphPosition;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
