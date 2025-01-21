@@ -62,40 +62,26 @@ class CropBoxStore {
 
   // 设置裁剪框尺寸显示容器展示状态
   setCutBoxSizeStatus(status: boolean) {
-    if (componentDomStore.cutBoxSizeContainer == null) return;
-    componentDomStore.cutBoxSizeContainer.style.display = status
-      ? "flex"
-      : "none";
+    componentDomStore.updateCutBoxSizeShowState(status ? "flex" : "none");
   }
 
   // 设置裁剪框尺寸显示容器位置
   setCutBoxSizePosition(x: number, y: number) {
-    if (componentDomStore.cutBoxSizeContainer == null) return;
     const { left, top } = getToolRelativePosition(x, y);
     let sscTop = 0;
     if (componentDomStore.screenShotController) {
       sscTop = parseInt(componentDomStore.screenShotController.style.top);
     }
-    componentDomStore.cutBoxSizeContainer.style.left = `${left}px`;
-    componentDomStore.cutBoxSizeContainer.style.top = `${top + sscTop}px`;
+    componentDomStore.updateCutBoxSizePosition(left, top, sscTop);
   }
 
   // 设置裁剪框尺寸
   setCutBoxSize(width: number, height: number) {
-    if (componentDomStore.cutBoxSizeContainer == null) return;
     // width和height保留整数
-    width = Math.floor(width);
-    height = Math.floor(height);
-    const childrenPanel = componentDomStore.cutBoxSizeContainer.childNodes;
-    // p标签已存在直接更改文本值即可
-    if (childrenPanel.length > 0) {
-      (childrenPanel[0] as HTMLParagraphElement).innerText = `${width} * ${height}`;
-      return;
-    }
-    // 不存在则渲染
-    const textPanel = document.createElement("p");
-    textPanel.innerText = `${width} * ${height}`;
-    componentDomStore.cutBoxSizeContainer.appendChild(textPanel);
+    componentDomStore.updateCutBoxSizeInfo(
+      Math.floor(width),
+      Math.floor(height)
+    );
   }
 
   updateDrawGraphPosition(

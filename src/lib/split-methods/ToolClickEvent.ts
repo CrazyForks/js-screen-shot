@@ -120,7 +120,7 @@ export function toolClickEvent(
     // 隐藏画笔尺寸选择容器
     toolBarStore.setBrushSelectionStatus(false);
     // 颜色选择容器添加布局兼容样式
-    toolBarStore.getColorSelectPanel()?.classList.add("text-select-status");
+    componentDomStore.addColorSelectPanelClassStyle("text-select-status");
   } else {
     // 隐藏下拉选择框
     textInputStore.setTextSizePanelStatus(false);

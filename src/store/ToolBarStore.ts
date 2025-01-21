@@ -2,7 +2,6 @@ import { makeAutoObservable } from "mobx";
 import componentDomStore from "@/store/ComponentDomStore";
 import { getToolRelativePosition } from "@/lib/common-methods/GetToolRelativePosition";
 import { textInfoType, ToolBarStoreDataType } from "@/lib/type/ComponentType";
-import { takeOutHistory } from "@/lib/common-methods/TakeOutHistory";
 
 class ToolBarStore {
   private initialState(): ToolBarStoreDataType {
@@ -51,29 +50,16 @@ class ToolBarStore {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  getColorSelectPanel() {
-    componentDomStore.colorSelectPanel = document.getElementById(
-      "colorSelectPanel"
-    );
-    return componentDomStore.colorSelectPanel;
-  }
-
   // 设置截图工具栏展示状态
   setToolStatus(status: boolean) {
-    if (componentDomStore.toolController == null) return;
-    componentDomStore.toolController.style.display = status ? "block" : "none";
+    componentDomStore.updateToolShowStatus(status ? "block" : "none");
   }
 
   // 设置截图工具位置信息
   setToolInfo(left: number, top: number) {
     if (componentDomStore.toolController == null) return;
     const { left: rLeft, top: rTop } = getToolRelativePosition(left, top);
-    componentDomStore.toolController.style.left = `${rLeft}px`;
-    let sscTop = 0;
-    if (componentDomStore.screenShotController) {
-      sscTop = parseInt(componentDomStore.screenShotController.style.top);
-    }
-    componentDomStore.toolController.style.top = `${rTop + sscTop}px`;
+    componentDomStore.updateToolPosition(rTop, rLeft);
   }
 
   // 获取工具栏位置
@@ -85,58 +71,18 @@ class ToolBarStore {
     };
   }
 
-  private getBrushSelectionController() {
-    componentDomStore.brushSelectionController = document.getElementById(
-      "brushSelectPanel"
-    ) as HTMLDivElement | null;
-    return componentDomStore.brushSelectionController;
-  }
-
-  private getColorPanel() {
-    componentDomStore.colorSelectController = document.getElementById(
-      "colorPanel"
-    );
-    return componentDomStore.colorSelectController;
-  }
-
-  private getRightPanel() {
-    componentDomStore.rightPanel = document.getElementById("rightPanel");
-    return componentDomStore.rightPanel;
-  }
-
-  private getUndoController() {
-    componentDomStore.undoController = document.getElementById("undoPanel");
-    return componentDomStore.undoController;
-  }
-
   // 设置选项状态
   setOptionStatus(status: boolean) {
-    if (
-      componentDomStore.optionIcoController == null ||
-      componentDomStore.optionController == null
-    )
-      return;
-    componentDomStore.optionIcoController.style.display = status
-      ? "block"
-      : "none";
-    componentDomStore.optionController.style.display = status
-      ? "block"
-      : "none";
+    componentDomStore.updateToolOptionShowState(status ? "block" : "none");
   }
 
   // 隐藏画笔工具栏三角形角标
   hiddenOptionIcoStatus() {
-    if (componentDomStore.optionIcoController == null) return;
-    componentDomStore.optionIcoController.style.display = "none";
+    componentDomStore.updateToolOptIcon("none");
   }
 
   // 设置画笔选择工具栏位置
   setOptionPosition(position: number) {
-    if (
-      componentDomStore.optionIcoController == null ||
-      componentDomStore.optionController == null
-    )
-      return;
     // 修改位置
     const toolPosition = this.getToolPosition();
     if (toolPosition == null) return;
@@ -144,10 +90,12 @@ class ToolBarStore {
     const icoTop = `${toolPosition.top + 44}px`;
     const optionLeft = `${toolPosition.left}px`;
     const optionTop = `${toolPosition.top + 44 + 6}px`;
-    componentDomStore.optionIcoController.style.left = icoLeft;
-    componentDomStore.optionIcoController.style.top = icoTop;
-    componentDomStore.optionController.style.left = optionLeft;
-    componentDomStore.optionController.style.top = optionTop;
+    componentDomStore.updateToolOptionPosition(
+      icoLeft,
+      icoTop,
+      optionLeft,
+      optionTop
+    );
   }
 
   // 设置工具点击状态
@@ -158,9 +106,7 @@ class ToolBarStore {
   // 设置选中的颜色
   setSelectedColor(color: string) {
     this.selectedColor = color;
-    this.getColorSelectPanel();
-    if (componentDomStore.colorSelectPanel == null) return;
-    componentDomStore.colorSelectPanel.style.backgroundColor = color;
+    componentDomStore.updateColorSelectPanelColor(color);
   }
 
   // 设置工具名称
@@ -225,50 +171,33 @@ class ToolBarStore {
 
   // 设置画笔选择状态
   setBrushSelectionStatus(status: boolean) {
-    this.getBrushSelectionController();
-    if (componentDomStore.brushSelectionController == null) return;
-    componentDomStore.brushSelectionController.style.display = status
-      ? "block"
-      : "none";
+    componentDomStore.getBrushSelectionController();
+    componentDomStore.updateBrushSelectionShowState(status ? "block" : "none");
   }
 
   // 设置颜色面板状态
   setColorPanelStatus(status: boolean) {
-    this.getColorPanel();
-    if (componentDomStore.colorSelectController == null) return;
-    componentDomStore.colorSelectController.style.display = status
-      ? "flex"
-      : "none";
+    componentDomStore.getColorPanel();
+    componentDomStore.updateColorPanelShowState(status ? "flex" : "none");
   }
 
   // 设置右侧面板状态
   setRightPanel(status: boolean) {
-    this.getRightPanel();
-    if (componentDomStore.rightPanel == null) return;
-    componentDomStore.rightPanel.style.display = status ? "flex" : "none";
+    componentDomStore.getRightPanel();
+    componentDomStore.updateRightPanelShowState(status ? "flex" : "none");
   }
 
   // 设置撤销按钮状态
   setUndoStatus(status: boolean) {
-    this.getUndoController();
-    if (componentDomStore.undoController == null) return;
+    componentDomStore.getUndoController();
+
     if (status) {
       // 启用撤销按钮
-      componentDomStore.undoController.classList.add("undo");
-      componentDomStore.undoController.classList.remove("undo-disabled");
-      componentDomStore.undoController.addEventListener(
-        "click",
-        takeOutHistory
-      );
+      componentDomStore.enableUndoButton();
       return;
     }
     // 禁用撤销按钮
-    componentDomStore.undoController.classList.add("undo-disabled");
-    componentDomStore.undoController.classList.remove("undo");
-    componentDomStore.undoController.removeEventListener(
-      "click",
-      takeOutHistory
-    );
+    componentDomStore.disableUndoButton();
   }
 
   // 重置状态

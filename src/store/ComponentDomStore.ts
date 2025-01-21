@@ -4,6 +4,8 @@ import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
 import toolBarStore from "@/store/ToolBarStore";
 import userParamStore from "@/store/UserParamStore";
 import { ComponentDomStoreDataType } from "@/lib/type/ComponentType";
+import drawingDataStore from "@/store/DrawingDataStore";
+import { takeOutHistory } from "@/lib/common-methods/TakeOutHistory";
 
 class ComponentDomStore {
   // 初始状态封装对象
@@ -16,8 +18,6 @@ class ComponentDomStore {
       cutBoxSizeContainer: null,
       textInputController: null,
       colorSelectPanel: null,
-      textSizeContainer: null,
-      optionTextSizeController: null,
       brushSelectionController: null,
       colorSelectController: null,
       rightPanel: null,
@@ -36,8 +36,6 @@ class ComponentDomStore {
   cutBoxSizeContainer = this.initialState().cutBoxSizeContainer;
   textInputController = this.initialState().textInputController;
   colorSelectPanel = this.initialState().colorSelectPanel;
-  textSizeContainer = this.initialState().textSizeContainer;
-  optionTextSizeController = this.initialState().optionTextSizeController;
   brushSelectionController = this.initialState().brushSelectionController;
   colorSelectController = this.initialState().colorSelectController;
   rightPanel = this.initialState().rightPanel;
@@ -51,6 +49,10 @@ class ComponentDomStore {
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  private getColorSelectPanel() {
+    this.colorSelectPanel = document.getElementById("colorSelectPanel");
   }
 
   destroyDOM() {
@@ -107,8 +109,8 @@ class ComponentDomStore {
 
   // 初始化webrtc模式所需要的辅助dom
   initWebRtcDom() {
-    componentDomStore.videoController = document.createElement("video");
-    componentDomStore.videoController.autoplay = true;
+    this.videoController = document.createElement("video");
+    this.videoController.autoplay = true;
   }
 
   // 从dom中获取截图所需的canvas容器并设置到store中
@@ -136,6 +138,156 @@ class ComponentDomStore {
   setVideoSrcObject(videoSrcObject: MediaStream | null) {
     if (this.videoController == null) return;
     this.videoController.srcObject = videoSrcObject;
+  }
+
+  updateCutBoxSizeShowState(domStyleState: "flex" | "none") {
+    if (this.cutBoxSizeContainer == null) return;
+    this.cutBoxSizeContainer.style.display = domStyleState;
+  }
+
+  updateTextInputShowState(domStyleState: "block" | "none") {
+    if (this.textInputController == null) return;
+    this.textInputController.style.display = domStyleState;
+  }
+
+  updateCutBoxSizePosition(left: number, top: number, sscTop: number) {
+    if (this.cutBoxSizeContainer == null) return;
+    this.cutBoxSizeContainer.style.left = `${left}px`;
+    this.cutBoxSizeContainer.style.top = `${top + sscTop}px`;
+  }
+
+  updateCutBoxSizeInfo(width: number, height: number) {
+    if (this.cutBoxSizeContainer == null) return;
+    const childrenPanel = this.cutBoxSizeContainer.childNodes;
+    // p标签已存在直接更改文本值即可
+    if (childrenPanel.length > 0) {
+      (childrenPanel[0] as HTMLParagraphElement).innerText = `${width} * ${height}`;
+      return;
+    }
+    // 不存在则渲染
+    const textPanel = document.createElement("p");
+    textPanel.innerText = `${width} * ${height}`;
+    this.cutBoxSizeContainer.appendChild(textPanel);
+  }
+
+  updateScreenShotControllerSize(width: number, height: number) {
+    if (this.screenShotController == null) return;
+    this.screenShotController.width = width;
+    this.screenShotController.height = height;
+  }
+
+  updateScreenShotPosition(rLeft: number, rTop: number) {
+    if (this.screenShotController == null) return;
+    this.screenShotController.style.left = `${rLeft}px`;
+    this.screenShotController.style.top = `${rTop}px`;
+  }
+
+  addColorSelectPanelClassStyle(className: string) {
+    this.getColorSelectPanel();
+    if (this.colorSelectPanel == null) return;
+    this.colorSelectPanel.classList.add(className);
+  }
+
+  updateColorSelectPanelColor(color: string) {
+    this.getColorSelectPanel();
+    if (this.colorSelectPanel == null) return;
+    this.colorSelectPanel.style.backgroundColor = color;
+  }
+
+  updateToolShowStatus(status: "block" | "none") {
+    if (this.toolController == null) return;
+    this.toolController.style.display = status;
+  }
+
+  updateToolPosition(rTop: number, rLeft: number) {
+    if (this.toolController == null) return;
+    this.toolController.style.left = `${rLeft}px`;
+    let sscTop = 0;
+    if (this.screenShotController) {
+      sscTop = parseInt(this.screenShotController.style.top);
+    }
+    this.toolController.style.top = `${rTop + sscTop}px`;
+  }
+
+  // 显示截图区域容器
+  showScreenShotPanel() {
+    if (this.screenShotController == null) return;
+    this.screenShotController.style.display = "block";
+  }
+
+  getBrushSelectionController() {
+    this.brushSelectionController = document.getElementById(
+      "brushSelectPanel"
+    ) as HTMLDivElement | null;
+  }
+
+  getColorPanel() {
+    this.colorSelectController = document.getElementById("colorPanel");
+  }
+
+  getRightPanel() {
+    this.rightPanel = document.getElementById("rightPanel");
+  }
+
+  getUndoController() {
+    this.undoController = document.getElementById("undoPanel");
+  }
+
+  updateToolOptionShowState(domStyleState: "block" | "none") {
+    if (this.optionIcoController == null || this.optionController == null)
+      return;
+    this.optionIcoController.style.display = domStyleState;
+    this.optionController.style.display = domStyleState;
+  }
+
+  updateToolOptIcon(domStyleState: "block" | "none") {
+    if (this.optionIcoController == null) return;
+    this.optionIcoController.style.display = domStyleState;
+  }
+
+  updateToolOptionPosition(
+    icoLeft: string,
+    icoTop: string,
+    optionLeft: string,
+    optionTop: string
+  ) {
+    if (this.optionIcoController == null || this.optionController == null)
+      return;
+    this.optionIcoController.style.left = icoLeft;
+    this.optionIcoController.style.top = icoTop;
+    this.optionController.style.left = optionLeft;
+    this.optionController.style.top = optionTop;
+  }
+
+  updateBrushSelectionShowState(domStyleState: "block" | "none") {
+    if (this.brushSelectionController == null) return;
+    this.brushSelectionController.style.display = domStyleState;
+  }
+
+  updateColorPanelShowState(domStyleState: "flex" | "none") {
+    if (this.colorSelectController == null) return;
+    this.colorSelectController.style.display = domStyleState;
+  }
+
+  updateRightPanelShowState(domStyleState: "flex" | "none") {
+    if (this.rightPanel == null) return;
+    this.rightPanel.style.display = domStyleState;
+  }
+
+  // 启用撤销按钮
+  enableUndoButton() {
+    if (this.undoController == null) return;
+    this.undoController.classList.add("undo");
+    this.undoController.classList.remove("undo-disabled");
+    this.undoController.addEventListener("click", takeOutHistory);
+  }
+
+  // 禁用撤销按钮
+  disableUndoButton() {
+    if (this.undoController == null) return;
+    this.undoController.classList.add("undo-disabled");
+    this.undoController.classList.remove("undo");
+    this.undoController.removeEventListener("click", takeOutHistory);
   }
 
   // 重置状态

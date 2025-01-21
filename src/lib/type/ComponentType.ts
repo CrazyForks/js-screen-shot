@@ -182,8 +182,6 @@ export type ComponentDomStoreDataType = {
   cutBoxSizeContainer: HTMLDivElement | null;
   textInputController: HTMLDivElement | null;
   colorSelectPanel: HTMLElement | null;
-  textSizeContainer: HTMLDivElement | null;
-  optionTextSizeController: HTMLDivElement | null;
   brushSelectionController: HTMLDivElement | null;
   colorSelectController: HTMLElement | null;
   rightPanel: HTMLElement | null;

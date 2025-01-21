@@ -23,13 +23,11 @@ class ScreenShotCanvasStore {
 
   // 设置截图容器宽高
   setScreenShotInfo(width: number, height: number) {
-    if (componentDomStore.screenShotController == null) return;
     // 增加截图锁屏
     if (componentDomStore.noScrollStatus) {
       document.body.classList.add("__screenshot-lock-scroll");
     }
-    componentDomStore.screenShotController.width = width;
-    componentDomStore.screenShotController.height = height;
+    componentDomStore.updateScreenShotControllerSize(width, height);
   }
 
   updateScreenShotCanvas(screenShotCanvas: CanvasRenderingContext2D) {
@@ -38,16 +36,8 @@ class ScreenShotCanvasStore {
 
   // 设置截图容器位置
   setScreenShotPosition(left: number, top: number) {
-    if (componentDomStore.screenShotController == null) return;
     const { left: rLeft, top: rTop } = getToolRelativePosition(left, top);
-    componentDomStore.screenShotController.style.left = `${rLeft}px`;
-    componentDomStore.screenShotController.style.top = `${rTop}px`;
-  }
-
-  // 显示截图区域容器
-  showScreenShotPanel() {
-    if (componentDomStore.screenShotController == null) return;
-    componentDomStore.screenShotController.style.display = "block";
+    componentDomStore.updateScreenShotPosition(rLeft, rTop);
   }
 
   // 设置截图画布控制器

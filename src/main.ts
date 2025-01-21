@@ -116,7 +116,7 @@ export default class ScreenShot {
     );
     if (context == null) return;
     // 显示截图区域容器
-    screenShotCanvasStore.showScreenShotPanel();
+    componentDomStore.showScreenShotPanel();
     if (!userParamStore.enableWebRtc) {
       h2cScreenShot(
         triggerCallback,
