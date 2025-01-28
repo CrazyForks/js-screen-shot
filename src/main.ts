@@ -32,6 +32,7 @@ import {
   handleCanvasMouseMove,
   operatingCutOutBox
 } from "@/lib/main-entrance/MouseDownCore";
+import observeStore from "@/store/StoreObserver";
 
 export default class ScreenShot {
   // 截图图片存放容器
@@ -87,6 +88,9 @@ export default class ScreenShot {
       // 给截图容器添加右键事件监听
       registerForRightClickEvent(componentDomStore.screenShotController);
     }
+
+    // 监听store变化
+    observeStore();
   }
 
   // 销毁组件方法

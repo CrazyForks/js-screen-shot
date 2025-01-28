@@ -205,6 +205,7 @@ export type DrawingStoreDataType = {
   cutOutBoxBorderArr: Array<cutOutBoxBorder>;
   captureStream: MediaStream | null;
   movePosition: movePositionType;
+  history: Array<Record<string, any>>;
   borderOption: number | null;
   mouseInsideCropBox: boolean;
   tempGraphPosition: positionInfoType;
@@ -213,6 +214,9 @@ export type DrawingStoreDataType = {
   drawGraphPrevY: number;
   drawStatus: boolean;
   degreeOfBlur: number;
+  resetAllStore: boolean;
+  // 工具栏的撤销功能是否可用
+  canUndo: boolean;
 };
 
 export type ScreenShotCanvasStoreDataType = {
@@ -228,7 +232,6 @@ export type ToolBarStoreDataType = {
   penSize: number;
   fontSize: number;
   mosaicPenSize: number;
-  history: Array<Record<string, any>>;
   toolPositionStatus: boolean;
   activeTool: string;
   textEditState: boolean;

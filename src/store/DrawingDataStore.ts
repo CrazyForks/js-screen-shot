@@ -18,6 +18,7 @@ class DrawingDataStore {
         moveStartX: 0,
         moveStartY: 0
       },
+      history: [],
       // 当前操作的边框节点
       borderOption: null,
       // 鼠标是否在裁剪框内
@@ -39,7 +40,9 @@ class DrawingDataStore {
       drawGraphPrevY: 0,
       drawStatus: false,
       // 马赛克涂抹区域大小
-      degreeOfBlur: 5
+      degreeOfBlur: 5,
+      resetAllStore: false,
+      canUndo: true
     };
   }
 
@@ -47,6 +50,8 @@ class DrawingDataStore {
   getFullScreenStatus = this.initialState().getFullScreenStatus;
   cutOutBoxBorderArr = this.initialState().cutOutBoxBorderArr;
   captureStream = this.initialState().captureStream;
+  // 画笔历史记录
+  history: Array<Record<string, any>> = this.initialState().history;
   movePosition = this.initialState().movePosition;
   borderOption = this.initialState().borderOption;
   mouseInsideCropBox = this.initialState().mouseInsideCropBox;
@@ -56,6 +61,8 @@ class DrawingDataStore {
   drawGraphPrevY = this.initialState().drawGraphPrevY;
   drawStatus = this.initialState().drawStatus;
   degreeOfBlur = this.initialState().degreeOfBlur;
+  resetAllStore = this.initialState().resetAllStore;
+  canUndo = this.initialState().canUndo;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -67,6 +74,14 @@ class DrawingDataStore {
 
   updateFullScreenStatus(status: boolean) {
     this.getFullScreenStatus = status;
+  }
+
+  resetCompState() {
+    this.resetAllStore = true;
+  }
+
+  updateCanUndo(canUndo: boolean) {
+    this.canUndo = canUndo;
   }
 
   updateCutOutBoxBorderArr(borderArr: Array<cutOutBoxBorder>) {
@@ -120,6 +135,21 @@ class DrawingDataStore {
 
   updateDrawStatus(status: boolean) {
     this.drawStatus = status;
+  }
+
+  // 移除历史记录的第一个元素
+  shiftHistory() {
+    return this.history.shift();
+  }
+
+  // 移除历史记录的最后一个元素
+  popHistory() {
+    return this.history.pop();
+  }
+
+  // 添加历史记录
+  pushHistory(item: Record<string, any>) {
+    this.history.push(item);
   }
 
   // 重置状态

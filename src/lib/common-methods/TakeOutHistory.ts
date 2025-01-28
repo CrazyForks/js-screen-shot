@@ -1,18 +1,17 @@
 /**
  * 取出一条历史记录
  */
-import toolBarStore from "@/store/ToolBarStore";
-import componentDomStore from "@/store/ComponentDomStore";
+import drawingDataStore from "@/store/DrawingDataStore";
 
-export function takeOutHistory() {
-  toolBarStore.popHistory();
-  const screenShortCanvas = componentDomStore.screenShotController?.getContext(
-    "2d"
-  );
+export function takeOutHistory(
+  screenShortCanvas: CanvasRenderingContext2D | null | undefined,
+  disableUndo: () => void
+) {
+  drawingDataStore.popHistory();
   if (screenShortCanvas != null) {
-    if (toolBarStore.history.length > 0) {
+    if (drawingDataStore.history.length > 0) {
       screenShortCanvas.putImageData(
-        toolBarStore.history[toolBarStore.history.length - 1]["data"],
+        drawingDataStore.history[drawingDataStore.history.length - 1]["data"],
         0,
         0
       );
@@ -20,7 +19,7 @@ export function takeOutHistory() {
   }
 
   // 历史记录已取完，禁用撤回按钮点击
-  if (toolBarStore.history.length - 1 <= 0) {
-    toolBarStore.setUndoStatus(false);
+  if (drawingDataStore.history.length - 1 <= 0) {
+    disableUndo();
   }
 }

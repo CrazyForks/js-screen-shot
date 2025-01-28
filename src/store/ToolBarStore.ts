@@ -13,7 +13,6 @@ class ToolBarStore {
       penSize: 2,
       fontSize: 17,
       mosaicPenSize: 10,
-      history: [],
       toolPositionStatus: false,
       activeTool: "",
       textEditState: false,
@@ -36,8 +35,7 @@ class ToolBarStore {
   fontSize: number = this.initialState().fontSize;
   // 马赛克工具的笔触大小
   mosaicPenSize: number = this.initialState().mosaicPenSize;
-  // 画笔历史记录
-  history: Array<Record<string, any>> = this.initialState().history;
+
   // 工具栏超出截图容器状态
   toolPositionStatus: boolean = this.initialState().toolPositionStatus;
   // 当前选中的工具
@@ -127,21 +125,6 @@ class ToolBarStore {
   // 设置马赛克笔触大小
   setMosaicPenSize(size: number) {
     this.mosaicPenSize = size;
-  }
-
-  // 移除历史记录的第一个元素
-  shiftHistory() {
-    return this.history.shift();
-  }
-
-  // 移除历史记录的最后一个元素
-  popHistory() {
-    return this.history.pop();
-  }
-
-  // 添加历史记录
-  pushHistory(item: Record<string, any>) {
-    this.history.push(item);
   }
 
   // 设置工具位置状态

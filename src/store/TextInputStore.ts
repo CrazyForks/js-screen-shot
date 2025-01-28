@@ -61,6 +61,10 @@ class TextInputStore {
     }
     this.textSizeContainer.style.display = "none";
   }
+  // 重置状态
+  reset() {
+    Object.assign(this, this.initialState());
+  }
 }
 
 const textInputStore = new TextInputStore();

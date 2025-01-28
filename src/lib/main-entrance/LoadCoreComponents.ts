@@ -718,11 +718,11 @@ const adjustContainerLevels = (level: number) => {
 const showCanvasLastHistory = () => {
   if (screenShotCanvasStore.screenShotCanvas != null) {
     const context = screenShotCanvasStore.screenShotCanvas;
-    if (toolBarStore.history.length <= 0) {
+    if (drawingDataStore.history.length <= 0) {
       addHistory();
     }
     context.putImageData(
-      toolBarStore.history[toolBarStore.history.length - 1]["data"],
+      drawingDataStore.history[drawingDataStore.history.length - 1]["data"],
       0,
       0
     );

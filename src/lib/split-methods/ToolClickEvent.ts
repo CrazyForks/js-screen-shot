@@ -181,7 +181,12 @@ export function toolClickEvent(
   if (toolName == "undo") {
     // 隐藏画笔选项工具栏
     toolBarStore.setOptionStatus(false);
-    takeOutHistory();
+    takeOutHistory(
+      componentDomStore.screenShotController?.getContext("2d"),
+      () => {
+        toolBarStore.setUndoStatus(false);
+      }
+    );
   }
 }
 

@@ -1,11 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import cropBoxStore from "@/store/CropBoxStore";
-import screenShotCanvasStore from "@/store/ScreenShotCanvasStore";
-import toolBarStore from "@/store/ToolBarStore";
-import userParamStore from "@/store/UserParamStore";
 import { ComponentDomStoreDataType } from "@/lib/type/ComponentType";
-import drawingDataStore from "@/store/DrawingDataStore";
 import { takeOutHistory } from "@/lib/common-methods/TakeOutHistory";
+import drawingDataStore from "@/store/DrawingDataStore";
 
 class ComponentDomStore {
   // 初始状态封装对象
@@ -83,8 +79,8 @@ class ComponentDomStore {
       document.documentElement.classList.remove("hidden-screen-shot-scroll");
       document.body.classList.remove("hidden-screen-shot-scroll");
     }
-    // store中的状态重置
-    this.resetStore();
+    // 重置组件状态
+    drawingDataStore.resetCompState();
   }
 
   setNoScrollStatus(status?: boolean) {
@@ -92,17 +88,6 @@ class ComponentDomStore {
       this.noScrollStatus = status;
     }
   }
-
-  private resetStore() {
-    runInAction(() => {
-      this.reset();
-      cropBoxStore.reset();
-      screenShotCanvasStore.reset();
-      toolBarStore.reset();
-      userParamStore.reset();
-    });
-  }
-
   setResetScrollbarState(state: boolean) {
     this.resetScrollbarState = state;
   }
@@ -269,6 +254,13 @@ class ComponentDomStore {
     this.colorSelectController.style.display = domStyleState;
   }
 
+  private undoFn() {
+    takeOutHistory(this.screenShotController?.getContext("2d"), () => {
+      // 禁用撤销功能
+      drawingDataStore.updateCanUndo(false);
+    });
+  }
+
   updateRightPanelShowState(domStyleState: "flex" | "none") {
     if (this.rightPanel == null) return;
     this.rightPanel.style.display = domStyleState;
@@ -279,7 +271,7 @@ class ComponentDomStore {
     if (this.undoController == null) return;
     this.undoController.classList.add("undo");
     this.undoController.classList.remove("undo-disabled");
-    this.undoController.addEventListener("click", takeOutHistory);
+    this.undoController.addEventListener("click", this.undoFn);
   }
 
   // 禁用撤销按钮
@@ -287,7 +279,7 @@ class ComponentDomStore {
     if (this.undoController == null) return;
     this.undoController.classList.add("undo-disabled");
     this.undoController.classList.remove("undo");
-    this.undoController.removeEventListener("click", takeOutHistory);
+    this.undoController.removeEventListener("click", this.undoFn);
   }
 
   // 重置状态
