@@ -38,6 +38,7 @@ import {
 } from "@/lib/split-methods/AddHistoryData";
 import { isPC, isTouchDevice } from "@/lib/common-methods/DeviceTypeVerif";
 import { drawLineArrow } from "@/lib/split-methods/DrawLineArrow";
+import { drawImgToCanvas } from "@/lib/split-methods/DrawImgToCanvas";
 
 export default class ScreenShot {
   // 当前实例的响应式data数据
@@ -1434,33 +1435,21 @@ export default class ScreenShot {
     context: CanvasRenderingContext2D,
     imgSrc: string
   ) {
-    const imgContainer = new Image();
-
-    imgContainer.src = imgSrc;
-    imgContainer.width = this.screenShotImageController.width;
-    imgContainer.height = this.screenShotImageController.height;
-    imgContainer.crossOrigin = "Anonymous";
-    imgContainer.onload = () => {
-      // 装载截图的dom为null则退出
-      if (this.screenShotContainer == null) return;
-
+    drawImgToCanvas(
+      imgSrc,
+      this.screenShotImageController.width,
+      this.screenShotImageController.height,
+      this.dpr
+    ).then(canvas => {
       // 将用户传递的图片绘制到图片容器里
-      this.screenShotImageController
-        .getContext("2d")
-        ?.drawImage(
-          imgContainer,
-          0,
-          0,
-          this.screenShotImageController.width,
-          this.screenShotImageController.height
-        );
+      this.screenShotImageController = canvas;
       // 初始化截图容器
       this.initScreenShot(
         triggerCallback,
         context,
         this.screenShotImageController
       );
-    };
+    });
   }
 
   /**
