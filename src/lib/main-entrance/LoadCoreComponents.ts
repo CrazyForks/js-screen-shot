@@ -188,67 +188,18 @@ const showToolBar = (
 };
 
 /**
- * 向截图容器中绘制图片
- * @param triggerCallback
- * @param context
- * @param imgSrc
- * @param mouseEventFn
- * @param screenShotImageController
- * @private
- */
-const drawPictures = (
-  triggerCallback: Function | undefined,
-  context: CanvasRenderingContext2D,
-  imgSrc: string,
-  mouseEventFn: mouseEventFnType,
-  screenShotImageController: HTMLCanvasElement
-) => {
-  const imgContainer = new Image();
-
-  imgContainer.src = imgSrc;
-  imgContainer.width = screenShotImageController.width;
-  imgContainer.height = screenShotImageController.height;
-  imgContainer.crossOrigin = "Anonymous";
-  imgContainer.onload = () => {
-    // 装载截图的dom为null则退出
-    if (componentDomStore.screenShotController == null) return;
-
-    // 将用户传递的图片绘制到图片容器里
-    screenShotImageController
-      .getContext("2d")
-      ?.drawImage(
-        imgContainer,
-        0,
-        0,
-        screenShotImageController.width,
-        screenShotImageController.height
-      );
-    // 初始化截图容器
-    initScreenShot(
-      triggerCallback,
-      context,
-      componentDomStore.screenShotController,
-      mouseEventFn,
-      screenShotImageController
-    );
-  };
-};
-
-/**
  * 初始化截图容器
  * @param triggerCallback
  * @param context
- * @param screenShotContainer
+ * @param screenShotImgDataSource
  * @param mouseEventFn
- * @param screenShotImageController
  * @private
  */
 const initScreenShot = (
   triggerCallback: Function | undefined,
   context: CanvasRenderingContext2D,
-  screenShotContainer: HTMLCanvasElement,
-  mouseEventFn: mouseEventFnType,
-  screenShotImageController: HTMLCanvasElement
+  screenShotImgDataSource: HTMLCanvasElement,
+  mouseEventFn: mouseEventFnType
 ) => {
   if (triggerCallback != null) {
     // 加载成功，执行回调函数
@@ -257,10 +208,10 @@ const initScreenShot = (
   // 更新store中的截图区域canvas画布
   screenShotCanvasStore.updateScreenShotCanvas(context);
   // 存储屏幕截图
-  screenShotCanvasStore.setImageController(screenShotContainer);
+  screenShotCanvasStore.setImageController(screenShotImgDataSource);
 
   // 绘制蒙层
-  drawMasking(context, screenShotContainer);
+  drawMasking(context, screenShotImgDataSource);
   // 截图容器添加鼠标点击/触摸事件的监听
   setScreenShotContainerEventListener(
     mouseEventFn.mouseDownEvent,
@@ -272,7 +223,7 @@ const initScreenShot = (
     userParamStore.cropBoxInfo != null &&
     Object.keys(userParamStore.cropBoxInfo).length == 4
   ) {
-    initCropBox(userParamStore.cropBoxInfo, screenShotImageController);
+    initCropBox(userParamStore.cropBoxInfo, screenShotImgDataSource);
   }
 };
 
@@ -344,7 +295,6 @@ const initCropBox = (
     componentDomStore.screenShotController,
     screenShotImageController
   );
-  // todo: 需要提取
   // 保存边框节点信息
   drawingDataStore.updateCutOutBoxBorderArr(
     saveBorderArrInfo(cropBoxStore.borderSize, cropBoxStore.drawGraphPosition)
@@ -512,13 +462,7 @@ const loadScreenFlowData = (
     }
 
     // 初始化截图容器
-    initScreenShot(
-      undefined,
-      context,
-      screenShotImageController,
-      mouseEventFn,
-      screenShotImageController
-    );
+    initScreenShot(undefined, context, screenShotImageController, mouseEventFn);
     let displaySurface = null;
     let displayLabel = null;
     if (drawingDataStore.captureStream) {
@@ -644,17 +588,6 @@ const h2cScreenShot = (
   screenShotImageController: HTMLCanvasElement
 ): Promise<HTMLCanvasElement> => {
   return new Promise(resolve => {
-    // 判断用户是否自己传入截屏图片
-    if (userParamStore.imgSrc != null) {
-      drawPictures(
-        triggerCallback,
-        context,
-        userParamStore.imgSrc,
-        mouseEventFn,
-        screenShotImageController
-      );
-      return;
-    }
     // html2canvas截屏
     html2canvas(
       userParamStore.screenShotDom
@@ -674,13 +607,7 @@ const h2cScreenShot = (
         // 将html2canvas截取的内容回传
         resolve(canvas);
         // 初始化截图容器
-        initScreenShot(
-          triggerCallback,
-          context,
-          canvas,
-          mouseEventFn,
-          screenShotImageController
-        );
+        initScreenShot(triggerCallback, context, canvas, mouseEventFn);
       })
       .catch(err => {
         if (triggerCallback != null) {
@@ -740,7 +667,6 @@ export {
   getWindowContentData,
   registerContainerShortcuts,
   showToolBar,
-  drawPictures,
   initScreenShot,
   setScreenShotContainerSize,
   h2cScreenShot,

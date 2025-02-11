@@ -1,7 +1,7 @@
 import CreateDom from "@/lib/main-entrance/CreateDom";
 // 导入截图所需样式
 import "@/assets/scss/screen-shot.scss";
-import { screenShotType } from "@/lib/type/ComponentType";
+import { mouseEventFnType, screenShotType } from "@/lib/type/ComponentType";
 import cropBoxStore from "@/store/CropBoxStore";
 import { DrawArrow } from "@/lib/split-methods/DrawArrow";
 
@@ -19,6 +19,7 @@ import { setOptionalParameter } from "@/lib/split-methods/SetOptionalParameter";
 import {
   adjustContainerLevels,
   h2cScreenShot,
+  initScreenShot,
   registerContainerShortcuts,
   registerForRightClickEvent,
   sendStream,
@@ -121,6 +122,17 @@ export default class ScreenShot {
     if (context == null) return;
     // 显示截图区域容器
     componentDomStore.showScreenShotPanel();
+
+    // 调用者传入图片的情况
+    if (!userParamStore.enableWebRtc && userParamStore.imgSrc != null) {
+      this.drawPictures(triggerCallback, context, userParamStore.imgSrc, {
+        mouseDownEvent: this.mouseDownEvent,
+        mouseMoveEvent: this.mouseMoveEvent,
+        mouseUpEvent: this.mouseUpEvent
+      });
+      return;
+    }
+
     if (!userParamStore.enableWebRtc) {
       h2cScreenShot(
         triggerCallback,
@@ -234,4 +246,45 @@ export default class ScreenShot {
       this.dragFlag = false;
     });
   };
+
+  /**
+   * 向截图容器中绘制图片
+   * @param triggerCallback
+   * @param context
+   * @param imgSrc
+   * @param mouseEventFn
+   * @private
+   */
+  private drawPictures(
+    triggerCallback: Function | undefined,
+    context: CanvasRenderingContext2D,
+    imgSrc: string,
+    mouseEventFn: mouseEventFnType
+  ) {
+    const imgContainer = new Image();
+
+    imgContainer.src = imgSrc;
+    imgContainer.width = this.screenShotImageController.width;
+    imgContainer.height = this.screenShotImageController.height;
+    imgContainer.crossOrigin = "Anonymous";
+    imgContainer.onload = () => {
+      // 将用户传递的图片绘制到图片容器里
+      this.screenShotImageController
+        .getContext("2d")
+        ?.drawImage(
+          imgContainer,
+          0,
+          0,
+          this.screenShotImageController.width,
+          this.screenShotImageController.height
+        );
+      // 初始化截图容器
+      initScreenShot(
+        triggerCallback,
+        context,
+        this.screenShotImageController,
+        mouseEventFn
+      );
+    };
+  }
 }
