@@ -159,8 +159,6 @@ export default class ScreenShot {
       );
       return;
     }
-    // 隐藏光标
-    document.body.classList.add("no-cursor");
     // 使用webrtc实现截屏
     wrcScreenShot(
       cancelCallback,

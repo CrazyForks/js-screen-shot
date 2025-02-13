@@ -345,18 +345,30 @@ const setScreenShotContainerSize = (
   }
 };
 
+// 隐藏光标的辅助dom
+const getTopEl = () => {
+  let topEl = document.createElement("div");
+  topEl.style.cssText = `position: fixed;top: 0;left: 0;width: ${innerWidth}px;height: ${innerHeight}px;z-index: 9999;cursor: none;`;
+  return topEl;
+};
+
 const wrcScreenShot = (
   cancelCallback: Function | undefined,
   triggerCallback: Function | undefined,
   screenShotImageController: HTMLCanvasElement,
   mouseEventFn: mouseEventFnType
 ) => {
+  // 隐藏光标
+
   // 开始捕捉屏幕
   startCapture(cancelCallback, screenShotImageController).then(() => {
+    let topEl = getTopEl();
+    document.body.appendChild(topEl);
     loadScreenFlowData(
       triggerCallback,
       screenShotImageController,
-      mouseEventFn
+      mouseEventFn,
+      topEl
     );
   });
 };
@@ -364,9 +376,11 @@ const wrcScreenShot = (
 const loadScreenFlowData = (
   triggerCallback: Function | undefined,
   screenShotImageController: HTMLCanvasElement,
-  mouseEventFn: mouseEventFnType
+  mouseEventFn: mouseEventFnType,
+  topEl: HTMLDivElement
 ) => {
   setTimeout(() => {
+    topEl.remove();
     // 获取截图区域canvas容器画布
     if (componentDomStore.screenShotController == null) return;
     const canvasSize = userParamStore.getCanvasSize();
@@ -560,12 +574,14 @@ const sendStream = (
   screenShotImageController: HTMLCanvasElement,
   mouseEventFn: mouseEventFnType
 ) => {
+  let topEl = getTopEl();
   if (stream instanceof MediaStream) {
     componentDomStore.setVideoSrcObject(stream);
     loadScreenFlowData(
       triggerCallback,
       screenShotImageController,
-      mouseEventFn
+      mouseEventFn,
+      topEl
     );
   } else {
     if (cancelCallback != null) {
