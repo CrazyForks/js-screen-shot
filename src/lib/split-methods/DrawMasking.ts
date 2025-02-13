@@ -1,15 +1,6 @@
 import userParamStore from "@/store/UserParamStore";
 
-/**
- * 绘制蒙层
- * @param context 需要进行绘制canvas
- * @param imgData 屏幕截图canvas容器
- */
-export function drawMasking(
-  context: CanvasRenderingContext2D,
-  imgData?: HTMLCanvasElement
-) {
-  const canvasSize = userParamStore.getCanvasSize();
+export function getMaskingViewSize() {
   const viewSize = {
     width: parseFloat(window.getComputedStyle(document.body).width),
     height: parseFloat(window.getComputedStyle(document.body).height)
@@ -26,6 +17,23 @@ export function drawMasking(
     Math.max(document.body.offsetHeight, document.documentElement.offsetHeight),
     Math.max(document.body.clientHeight, document.documentElement.clientHeight)
   );
+  return {
+    maxWidth,
+    maxHeight
+  };
+}
+
+/**
+ * 绘制蒙层
+ * @param context 需要进行绘制canvas
+ * @param imgData 屏幕截图canvas容器
+ */
+export function drawMasking(
+  context: CanvasRenderingContext2D,
+  imgData?: HTMLCanvasElement
+) {
+  const canvasSize = userParamStore.getCanvasSize();
+  const { maxWidth, maxHeight } = getMaskingViewSize();
   // 清除画布
   context.clearRect(0, 0, maxWidth, maxHeight);
   // 屏幕截图存在且展示截图数据的状态为true则进行绘制

@@ -548,8 +548,10 @@ const handleCanvasMouseDown = (
     const tempGraphPosition = drawCutOutBox(
       0,
       0,
-      componentDomStore.screenShotController.width - borderSize / 2,
-      componentDomStore.screenShotController.height - borderSize / 2,
+      parseFloat(componentDomStore.screenShotController.style.width) -
+        borderSize / 2,
+      parseFloat(componentDomStore.screenShotController.style.height) -
+        borderSize / 2,
       screenShotCanvasStore.screenShotCanvas,
       borderSize,
       componentDomStore.screenShotController,

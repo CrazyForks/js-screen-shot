@@ -163,8 +163,7 @@ const showToolBar = (
     );
     // 重新计算工具栏的x轴位置
     const toolPositionX =
-      (drawGraphPosition.width / dpr -
-        componentDomStore.toolController.offsetWidth) /
+      (drawGraphPosition.width - componentDomStore.toolController.offsetWidth) /
       2;
     toolLocation.mouseY = containerHeight - fullScreenDiffHeight;
     toolLocation.mouseX = toolPositionX;
