@@ -584,8 +584,7 @@ const sendStream = (
 const h2cScreenShot = (
   triggerCallback: Function | undefined,
   context: CanvasRenderingContext2D,
-  mouseEventFn: mouseEventFnType,
-  screenShotImageController: HTMLCanvasElement
+  mouseEventFn: mouseEventFnType
 ): Promise<HTMLCanvasElement> => {
   return new Promise(resolve => {
     // html2canvas截屏

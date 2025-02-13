@@ -34,6 +34,7 @@ import {
   operatingCutOutBox
 } from "@/lib/main-entrance/MouseDownCore";
 import observeStore from "@/store/StoreObserver";
+import { drawImgToCanvas } from "@/lib/split-methods/DrawImgToCanvas";
 
 export default class ScreenShot {
   // 截图图片存放容器
@@ -134,16 +135,11 @@ export default class ScreenShot {
     }
 
     if (!userParamStore.enableWebRtc) {
-      h2cScreenShot(
-        triggerCallback,
-        context,
-        {
-          mouseDownEvent: this.mouseDownEvent,
-          mouseMoveEvent: this.mouseMoveEvent,
-          mouseUpEvent: this.mouseUpEvent
-        },
-        this.screenShotImageController
-      ).then(canvas => {
+      h2cScreenShot(triggerCallback, context, {
+        mouseDownEvent: this.mouseDownEvent,
+        mouseMoveEvent: this.mouseMoveEvent,
+        mouseUpEvent: this.mouseUpEvent
+      }).then(canvas => {
         this.screenShotImageController = canvas;
       });
       return;
@@ -261,23 +257,13 @@ export default class ScreenShot {
     imgSrc: string,
     mouseEventFn: mouseEventFnType
   ) {
-    const imgContainer = new Image();
-
-    imgContainer.src = imgSrc;
-    imgContainer.width = this.screenShotImageController.width;
-    imgContainer.height = this.screenShotImageController.height;
-    imgContainer.crossOrigin = "Anonymous";
-    imgContainer.onload = () => {
-      // 将用户传递的图片绘制到图片容器里
-      this.screenShotImageController
-        .getContext("2d")
-        ?.drawImage(
-          imgContainer,
-          0,
-          0,
-          this.screenShotImageController.width,
-          this.screenShotImageController.height
-        );
+    drawImgToCanvas(
+      imgSrc,
+      this.screenShotImageController.width,
+      this.screenShotImageController.height,
+      drawingDataStore.dpr
+    ).then(canvas => {
+      this.screenShotImageController = canvas;
       // 初始化截图容器
       initScreenShot(
         triggerCallback,
@@ -285,6 +271,6 @@ export default class ScreenShot {
         this.screenShotImageController,
         mouseEventFn
       );
-    };
+    });
   }
 }
