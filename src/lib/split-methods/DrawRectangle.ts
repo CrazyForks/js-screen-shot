@@ -1,3 +1,5 @@
+import { squareElementType } from "@/lib/type/ComponentType";
+
 /**
  * 绘制矩形
  * @param mouseX
@@ -9,12 +11,12 @@
  * @param context 需要进行绘制的canvas画布
  */
 export function drawRectangle(
-  mouseX: number,
-  mouseY: number,
-  width: number,
-  height: number,
-  color: string,
-  borderWidth: number,
+  mouseX: squareElementType["mouseX"],
+  mouseY: squareElementType["mouseY"],
+  width: squareElementType["width"],
+  height: squareElementType["height"],
+  color: squareElementType["color"],
+  borderWidth: squareElementType["borderWidth"],
   context: CanvasRenderingContext2D
 ) {
   context.save();

@@ -291,3 +291,19 @@ export type mouseEventFnType = {
   mouseMoveEvent: (event: MouseEvent | TouchEvent) => void;
   mouseUpEvent: () => void;
 };
+
+export type squareElementType = {
+  mouseX: number;
+  mouseY: number;
+  width: number;
+  height: number;
+  color: string;
+  borderWidth: number;
+};
+
+// 画布上已经绘制的元素
+export type drawElementInfoType = {
+  type: string;
+  id: string;
+  squareElement?: squareElementType | null;
+};
