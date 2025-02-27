@@ -7,6 +7,7 @@ export function updateContainerMouseStyle(
       container.style.cursor = "text";
       break;
     default:
+      console.log("执行了");
       container.style.cursor = "default";
       break;
   }

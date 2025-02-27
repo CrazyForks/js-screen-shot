@@ -1,8 +1,11 @@
 import { makeAutoObservable } from "mobx";
 import {
   cutOutBoxBorder,
-  DrawingStoreDataType
+  drawElementInfoType,
+  DrawingStoreDataType,
+  squareElementType
 } from "@/lib/type/ComponentType";
+import { isMouseInRectangle } from "@/lib/split-methods/ShapeUtils";
 
 class DrawingDataStore {
   private initialState(): DrawingStoreDataType {
@@ -42,7 +45,12 @@ class DrawingDataStore {
       // 马赛克涂抹区域大小
       degreeOfBlur: 5,
       resetAllStore: false,
-      canUndo: true
+      canUndo: true,
+      canvasElements: [],
+      // 当前正在操作的元素id
+      activeElementId: null,
+      // 当前选中的矩形元素的操作节点索引
+      rectOperateIndex: null
     };
   }
 
@@ -63,6 +71,9 @@ class DrawingDataStore {
   degreeOfBlur = this.initialState().degreeOfBlur;
   resetAllStore = this.initialState().resetAllStore;
   canUndo = this.initialState().canUndo;
+  canvasElements = this.initialState().canvasElements;
+  activeElementId = this.initialState().activeElementId;
+  rectOperateIndex = this.initialState().rectOperateIndex;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -145,6 +156,111 @@ class DrawingDataStore {
   // 移除历史记录的最后一个元素
   popHistory() {
     return this.history.pop();
+  }
+
+  addElement(element: drawElementInfoType) {
+    this.canvasElements.push(element);
+  }
+
+  removeElement(id: drawElementInfoType["id"]) {
+    this.canvasElements = this.canvasElements.filter(item => item.id !== id);
+  }
+
+  updateCanvasElement(element: squareElementType, id: string | null) {
+    for (let i = 0; i < this.canvasElements.length; i++) {
+      if (this.canvasElements[i].id === id) {
+        this.canvasElements[i] = {
+          ...this.canvasElements[i],
+          squareElement: element
+        };
+      }
+    }
+  }
+
+  clearEmptyCanvasElements(callback: (filteredLength: number) => void) {
+    // 宽高都为0也需要过滤
+    // todo:找出空元素后，把结果返回，回调函数中需要做二次处理
+    const findEmptyElement = this.canvasElements.filter(
+      item =>
+        item.squareElement !== null &&
+        item.squareElement?.width !== 0 &&
+        item.squareElement?.height !== 0
+    );
+    callback(findEmptyElement.length);
+    this.canvasElements = findEmptyElement;
+  }
+
+  // 校验鼠标是否处于元素上
+  checkMouseInElement(
+    x: number,
+    y: number,
+    callback: (elementId: string | null) => void
+  ) {
+    for (let i = 0; i < this.canvasElements.length; i++) {
+      const canvasElement = drawingDataStore.canvasElements[i];
+      // 矩形元素的判断
+      if (canvasElement.squareElement != null) {
+        const {
+          mouseX,
+          mouseY,
+          width,
+          height,
+          borderWidth
+        } = canvasElement.squareElement;
+        const isInside = isMouseInRectangle(
+          x,
+          y,
+          {
+            x: mouseX,
+            y: mouseY,
+            width,
+            height
+          },
+          borderWidth
+        );
+        if (isInside) {
+          callback(canvasElement.id);
+          return;
+        }
+      }
+    }
+    callback(null);
+  }
+
+  // 清除指定区域的元素
+  clearCanvasElement(
+    id: drawElementInfoType["id"]
+  ): Promise<{ x: number; y: number; w: number; h: number }> {
+    // 找到id对应的元素
+    const element = this.canvasElements.find(item => item.id === id);
+    return new Promise((resolve, reject) => {
+      if (element?.squareElement) {
+        // 计算并返回要清除的区域数据
+        resolve({
+          x: element?.squareElement.mouseX - element?.squareElement.borderWidth,
+          y: element?.squareElement.mouseY - element?.squareElement.borderWidth,
+          w:
+            element?.squareElement.width +
+            element?.squareElement.borderWidth * 2,
+          h:
+            element?.squareElement.height +
+            element?.squareElement.borderWidth * 2
+        });
+      }
+      reject("清除失败");
+    });
+  }
+  getCanvasElement(id: drawElementInfoType["id"]) {
+    return this.canvasElements.find(item => item.id === id);
+  }
+
+  // 更新正在操作的元素id
+  updateActiveElementId(id: drawElementInfoType["id"] | null) {
+    this.activeElementId = id;
+  }
+
+  updateRectOperateIndex(index: number) {
+    this.rectOperateIndex = index;
   }
 
   // 添加历史记录

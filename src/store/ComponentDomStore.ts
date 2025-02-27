@@ -20,7 +20,8 @@ class ComponentDomStore {
       undoController: null,
       videoController: null,
       noScrollStatus: false,
-      resetScrollbarState: false
+      resetScrollbarState: false,
+      mousePointer: "default"
     };
   }
 
@@ -42,6 +43,8 @@ class ComponentDomStore {
   noScrollStatus = this.initialState().noScrollStatus;
   // 是否需要还原页面的滚动条状态
   resetScrollbarState = this.initialState().resetScrollbarState;
+  // 当前鼠标指针状态
+  mousePointer = this.initialState().mousePointer;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -280,6 +283,13 @@ class ComponentDomStore {
     this.undoController.classList.add("undo-disabled");
     this.undoController.classList.remove("undo");
     this.undoController.removeEventListener("click", this.undoFn);
+  }
+
+  // 设置鼠标光标样式
+  setCursorStyle(style: string) {
+    if (this.screenShotController == null) return;
+    this.screenShotController.style.cursor = style;
+    this.mousePointer = style;
   }
 
   // 重置状态

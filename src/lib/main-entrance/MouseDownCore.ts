@@ -1,6 +1,8 @@
 import componentDomStore from "@/store/ComponentDomStore";
 import {
   drawCutOutBoxReturnType,
+  positionInfoType,
+  squareElementType,
   zoomCutOutBoxReturnType
 } from "@/lib/type/ComponentType";
 import drawingDataStore from "@/store/DrawingDataStore";
@@ -31,6 +33,163 @@ import { drawCircle } from "@/lib/split-methods/DrawCircle";
 import { drawRectangle } from "@/lib/split-methods/DrawRectangle";
 import { DrawArrow } from "@/lib/split-methods/DrawArrow";
 import { saveBorderArrInfo } from "@/lib/common-methods/SaveBorderArrInfo";
+import { nanoid } from "nanoid";
+import {
+  getScaleIndex,
+  isMouseInRectangle,
+  isMouseInsideRectangle
+} from "@/lib/split-methods/ShapeUtils";
+import {
+  calculateNewRectanglePosition,
+  calculateRectangleOffset,
+  handleMouseMoveOnElement,
+  showCanvasActiveElementBorder
+} from "@/lib/common-methods/CanvasElementEditUtils";
+
+const dotRadius = toolBarStore.penSize * 2;
+let prevElementId: null | string = null;
+let dragOffset = { x: 0, y: 0 };
+
+// 缩放画布上的元素
+function zoomCanvasElement(mouseX: number, mouseY: number) {
+  if (
+    !isMouseInsideRectangle(drawingDataStore.tempGraphPosition, {
+      mouseX,
+      mouseY
+    })
+  )
+    return;
+  // 获取当前正在操作的元素
+  const canvasElement = drawingDataStore.canvasElements.find(
+    item => item.id === prevElementId
+  );
+  drawingDataStore.updateDrawStatus(true);
+  switch (toolBarStore.toolName) {
+    case "square":
+      if (canvasElement && canvasElement.squareElement) {
+        drawingDataStore
+          .clearCanvasElement(canvasElement.id)
+          .then(clearArea => {
+            if (
+              drawingDataStore.rectOperateIndex == null ||
+              screenShotCanvasStore.screenShotCanvas == null
+            )
+              return;
+            const borderIndex = getScaleIndex(
+              drawingDataStore.rectOperateIndex
+            );
+            if (borderIndex == null) return;
+            // 清除当前id在画布上的数据
+            screenShotCanvasStore.screenShotCanvas.clearRect(
+              clearArea.x,
+              clearArea.y,
+              clearArea.w,
+              clearArea.h
+            );
+            const {
+              mouseX: rectX,
+              mouseY: rectY,
+              width: rectW,
+              height: rectH
+            } = canvasElement.squareElement as squareElementType;
+            // 实现矩形的缩放
+            const newPosition = zoomCutOutBoxPosition(
+              mouseX,
+              mouseY,
+              rectX,
+              rectY,
+              rectW,
+              rectH,
+              borderIndex
+            ) as zoomCutOutBoxReturnType;
+            // 重新绘制
+            drawRectangle(
+              newPosition.tempStartX,
+              newPosition.tempStartY,
+              newPosition.tempWidth,
+              newPosition.tempHeight,
+              toolBarStore.selectedColor,
+              toolBarStore.penSize,
+              screenShotCanvasStore.screenShotCanvas
+            );
+            drawingDataStore.updateCanvasElement(
+              {
+                mouseX: newPosition.tempStartX,
+                mouseY: newPosition.tempStartY,
+                width: newPosition.tempWidth,
+                height: newPosition.tempHeight,
+                color: toolBarStore.selectedColor,
+                borderWidth: toolBarStore.penSize
+              },
+              canvasElement.id
+            );
+          });
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+// 移动画布上的元素
+function moveCanvasElement(mouseX: number, mouseY: number) {
+  // 获取当前正在操作的元素
+  const canvasElement = drawingDataStore.canvasElements.find(
+    item => item.id === prevElementId
+  );
+  drawingDataStore.updateDrawStatus(true);
+
+  switch (toolBarStore.toolName) {
+    case "square":
+      if (canvasElement && canvasElement.squareElement) {
+        drawingDataStore
+          .clearCanvasElement(canvasElement.id)
+          .then(clearArea => {
+            // 清除当前id在画布上的数据
+            screenShotCanvasStore.screenShotCanvas?.clearRect(
+              clearArea.x,
+              clearArea.y,
+              clearArea.w,
+              clearArea.h
+            );
+            // 重新绘制
+            const newPosition = calculateNewRectanglePosition(
+              canvasElement.squareElement as squareElementType,
+              {
+                x: mouseX,
+                y: mouseY
+              },
+              drawingDataStore.tempGraphPosition,
+              dragOffset
+            );
+
+            drawRectangle(
+              newPosition.mouseX,
+              newPosition.mouseY,
+              newPosition.width,
+              newPosition.height,
+              toolBarStore.selectedColor,
+              toolBarStore.penSize,
+              screenShotCanvasStore.screenShotCanvas as CanvasRenderingContext2D
+            );
+            drawingDataStore.updateCanvasElement(
+              {
+                mouseX: newPosition.mouseX,
+                mouseY: newPosition.mouseY,
+                width: newPosition.width,
+                height: newPosition.height,
+                color: toolBarStore.selectedColor,
+                borderWidth: toolBarStore.penSize
+              },
+              canvasElement.id
+            );
+          });
+      }
+      break;
+    default:
+      break;
+  }
+}
 
 /**
  * 操作裁剪框
@@ -63,6 +222,7 @@ const operatingCutOutBox = (
   // 裁剪框边框节点事件存在且裁剪框未进行操作，则对鼠标样式进行修改
   if (
     drawingDataStore.cutOutBoxBorderArr.length > 0 &&
+    !toolBarStore.toolClickStatus &&
     !cropBoxStore.draggingTrim
   ) {
     // 标识鼠标是否在裁剪框内
@@ -92,25 +252,25 @@ const operatingCutOutBox = (
                 toolBarStore.activeTool
               );
             } else {
-              componentDomStore.screenShotController.style.cursor = "move";
+              componentDomStore.setCursorStyle("move");
             }
             break;
           case 2:
             // 工具栏被点击则不改变指针样式
             if (toolBarStore.toolClickStatus) break;
-            componentDomStore.screenShotController.style.cursor = "ns-resize";
+            componentDomStore.setCursorStyle("ns-resize");
             break;
           case 3:
             if (toolBarStore.toolClickStatus) break;
-            componentDomStore.screenShotController.style.cursor = "ew-resize";
+            componentDomStore.setCursorStyle("ew-resize");
             break;
           case 4:
             if (toolBarStore.toolClickStatus) break;
-            componentDomStore.screenShotController.style.cursor = "nwse-resize";
+            componentDomStore.setCursorStyle("nwse-resize");
             break;
           case 5:
             if (toolBarStore.toolClickStatus) break;
-            componentDomStore.screenShotController.style.cursor = "nesw-resize";
+            componentDomStore.setCursorStyle("nesw-resize");
             break;
           default:
             break;
@@ -126,7 +286,7 @@ const operatingCutOutBox = (
     context.closePath();
     if (!flag) {
       // 鼠标移出裁剪框重置鼠标样式
-      componentDomStore.screenShotController.style.cursor = "default";
+      componentDomStore.setCursorStyle("default");
       // 重置当前操作的边框节点为null
       drawingDataStore.updateBorderOption(null);
     }
@@ -235,6 +395,21 @@ const handleCanvasClick = (event: MouseEvent | TouchEvent) => {
       userParamStore
         .getCanvasEvents()
         ?.mouseDownFn(event, mouseX, mouseY, addHistory);
+    const elementId = nanoid();
+    // 存储当前绘制的元素
+    drawingDataStore.addElement({
+      id: elementId,
+      type: toolBarStore.toolName,
+      squareElement: null
+    });
+    // 隐藏画布上选中元素的操作框
+    showCanvasLastHistory();
+    if (drawingDataStore.activeElementId) {
+      prevElementId = drawingDataStore.activeElementId;
+    }
+    drawingDataStore.updateActiveElementId(elementId);
+    // 更新鼠标按下时坐标与矩形之间的偏移量
+    dragOffset = calculateRectangleOffset(mouseX, mouseY, prevElementId);
   }
   // 当前操作的是画笔
   if (
@@ -360,8 +535,32 @@ const handleCanvasMouseMove = (
   // 绘制中工具的临时宽高
   const tempWidth = currentX - startX;
   const tempHeight = currentY - startY;
+
+  // 判断鼠标坐标是否处于画布上已经绘制的元素内
+  if (toolBarStore.toolClickStatus && !cropBoxStore.dragging) {
+    drawingDataStore.checkMouseInElement(currentX, currentY, elementId =>
+      handleMouseMoveOnElement(elementId, currentX, currentY, dotRadius)
+    );
+    return;
+  }
+
   // 工具栏绘制
   if (toolBarStore.toolClickStatus && cropBoxStore.dragging) {
+    // 根据鼠标位置判断当前是否在操作画布上已绘制元素
+    switch (componentDomStore.mousePointer) {
+      case "move":
+        moveCanvasElement(currentX, currentY);
+        return;
+      case "nwse-resize":
+      case "nesw-resize":
+      case "ns-resize":
+      case "ew-resize":
+        zoomCanvasElement(currentX, currentY);
+        return;
+      default:
+        break;
+    }
+
     // 获取裁剪框位置信息
     const cutBoxPosition = cropBoxStore.cutOutBoxPosition;
     // 绘制中工具的起始x、y坐标不能小于裁剪框的起始坐标
@@ -400,6 +599,18 @@ const handleCanvasMouseMove = (
           toolBarStore.selectedColor,
           toolBarStore.penSize,
           screenShotCanvasStore.screenShotCanvas
+        );
+        // 更新当前元素在画布上的坐标
+        drawingDataStore.updateCanvasElement(
+          {
+            mouseX: startX,
+            mouseY: startY,
+            width: tempWidth,
+            height: tempHeight,
+            color: toolBarStore.selectedColor,
+            borderWidth: toolBarStore.penSize
+          },
+          drawingDataStore.activeElementId
         );
         break;
       case "round":
@@ -571,15 +782,35 @@ const handleCanvasMouseDown = (
   ) {
     return;
   }
+  // 清理画布内已保存的绘制元素中的空元素
+  drawingDataStore.clearEmptyCanvasElements(len => {
+    // 如果有空元素存在则重置当前活跃元素的id
+    if (len > 0) {
+      drawingDataStore.updateActiveElementId(prevElementId);
+    }
+  });
   // 工具栏已点击且进行了绘制
   if (toolBarStore.toolClickStatus && drawingDataStore.drawStatus) {
     isCustomTool() &&
       userParamStore.getCanvasEvents()?.mouseUpFn(showLastHistory);
+    console.log("保存绘制记录");
     // 保存绘制记录
     addHistory();
+    if (drawingDataStore.activeElementId) {
+      console.log(
+        "已经绘制好的图形",
+        drawingDataStore.getCanvasElement(drawingDataStore.activeElementId)
+      );
+      console.log(
+        "已保存的画布元素总数",
+        drawingDataStore.canvasElements.length
+      );
+    }
     return;
   } else if (toolBarStore.toolClickStatus && !drawingDataStore.drawStatus) {
     // 工具栏点击了但尚未进行绘制
+    // 显示画布上已绘制元素的边框操作节点
+    showCanvasActiveElementBorder(dotRadius);
     return;
   }
   // 保存绘制后的图形位置信息
@@ -604,7 +835,7 @@ const handleCanvasMouseDown = (
     userParamStore.clickCutFullScreen
   ) {
     // 修改鼠标状态为拖动
-    componentDomStore.screenShotController.style.cursor = "move";
+    componentDomStore.setCursorStyle("move");
     // 显示截图工具栏
     toolBarStore.setToolStatus(true);
     // 显示裁剪框尺寸显示容器

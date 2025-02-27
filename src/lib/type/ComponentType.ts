@@ -189,6 +189,7 @@ export type ComponentDomStoreDataType = {
   videoController: HTMLVideoElement | null;
   noScrollStatus: boolean;
   resetScrollbarState: boolean;
+  mousePointer: string;
 };
 
 export type CropBoxStoreDataType = {
@@ -217,6 +218,9 @@ export type DrawingStoreDataType = {
   resetAllStore: boolean;
   // 工具栏的撤销功能是否可用
   canUndo: boolean;
+  canvasElements: Array<drawElementInfoType>;
+  activeElementId: string | null;
+  rectOperateIndex: number | null;
 };
 
 export type ScreenShotCanvasStoreDataType = {
@@ -306,4 +310,21 @@ export type drawElementInfoType = {
   type: string;
   id: string;
   squareElement?: squareElementType | null;
+};
+
+// 画布上已绘制元素清除时的数据类型
+export type clearElementInfoType = {
+  clearArea: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  };
+  elementArea: {
+    mouseX: number;
+    mouseY: number;
+    width: number;
+    height: number;
+    borderWidth: number;
+  };
 };
