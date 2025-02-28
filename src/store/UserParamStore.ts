@@ -204,7 +204,7 @@ class UserParamStore {
   }
 
   // 设置保存回调函数
-  setSaveCallback(saveFn: (code: number, msg: string) => void) {
+  setSaveCallback(saveFn: (code: number, msg: string,base64:string) => void) {
     this.saveCallback = saveFn;
   }
 

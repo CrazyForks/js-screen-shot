@@ -19,18 +19,17 @@ export function getCanvasImgData(isSave: boolean) {
     if (isSave) {
       // 将canvas转为图片
       saveCanvasToImage(screenShotCanvas, startX, startY, width, height);
-    } else {
-      // 将canvas转为base64
-      base64 = saveCanvasToBase64(
-        screenShotCanvas,
-        startX,
-        startY,
-        width,
-        height,
-        0.75,
-        userParamStore.writeBase64
-      );
     }
+    // 将canvas转为base64
+    base64 = saveCanvasToBase64(
+      screenShotCanvas,
+      startX,
+      startY,
+      width,
+      height,
+      0.75,
+      userParamStore.writeBase64
+    );
   }
   return base64;
 }
