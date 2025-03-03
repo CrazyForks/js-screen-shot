@@ -145,10 +145,10 @@ export function toolClickEvent(
 
   // 保存图片
   if (toolName == "save") {
-    getCanvasImgData(true);
+    const base64 = getCanvasImgData(true);
     const callback = userParamStore.saveCallback;
     if (callback) {
-      callback(0, "保存成功");
+      callback(0, "保存成功",base64);
     }
     // 销毁组件
     componentDomStore.destroyDOM();
