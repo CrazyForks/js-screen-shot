@@ -48,7 +48,8 @@ class UserParamStore {
       h2cCrossImgLoadErrFn: null,
       saveCallback: null,
       saveImgTitle: null,
-      canvasEvents: null
+      canvasEvents: null,
+      renderOptions:{ x: 0, y: 0 }
     };
   }
 
@@ -87,6 +88,7 @@ class UserParamStore {
   saveCallback = this.initialState().saveCallback;
   saveImgTitle = this.initialState().saveImgTitle;
   canvasEvents = this.initialState().canvasEvents;
+  renderOptions = this.initialState().renderOptions;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -268,6 +270,11 @@ class UserParamStore {
   // 设置画布事件监听
   setCanvasEvents(event: mouseEventType) {
     this.canvasEvents = event;
+  }
+
+  setRenderOptions(x:number,y:number){
+    this.renderOptions.x = x
+    this.renderOptions.y = y
   }
 
   // 获取画布事件监听

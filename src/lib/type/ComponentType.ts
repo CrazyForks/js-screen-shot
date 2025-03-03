@@ -119,6 +119,8 @@ export type userToolbarFnType = (canvasInfo: {
 }) => void; // 用户自定义工具栏点击事件
 
 export type screenShotType = {
+  x?:number, // 截图的x轴偏移位置
+  y?:number, // 截图的y轴偏移位置
   enableWebRtc?: boolean; // 是否启用webrtc，默认是启用状态
   screenFlow?: MediaStream; // 设备提供的屏幕流数据(用于electron环境下自己传入的视频流数据)
   level?: number; // 截图容器层级
@@ -288,6 +290,7 @@ export type UserParamStoreDataType = {
   saveCallback: ((code: number, msg: string,base64:string) => void) | null;
   saveImgTitle: string | null;
   canvasEvents: mouseEventType | null;
+  renderOptions: { x: number, y: number } // html2Canvas原生render入参
 };
 
 export type mouseEventFnType = {
