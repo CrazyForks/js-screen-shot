@@ -608,6 +608,8 @@ const h2cScreenShot = (
         ? userParamStore.screenShotDom
         : document.body,
       {
+        x: userParamStore.renderOptions.x,
+        y: userParamStore.renderOptions.y,
         onclone: userParamStore.loadCrossImg ? drawCrossImg : undefined,
         proxy: userParamStore.proxyUrl,
         ignoreElements: userParamStore.h2cIgnoreElementsFn,

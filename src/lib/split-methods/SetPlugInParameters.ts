@@ -6,6 +6,8 @@ export function setPlugInParameters(options: screenShotType) {
   if (!options) return;
 
   const {
+    x = 0,
+    y = 0,
     enableWebRtc = true,
     screenFlow,
     canvasWidth,
@@ -64,6 +66,7 @@ export function setPlugInParameters(options: screenShotType) {
         userParamStore.setScreenShotDom(screenShotDom);
       }
     },
+
     cutBoxBdColor: () => {
       if (cutBoxBdColor) {
         userParamStore.setCutBoxBdColor(cutBoxBdColor);
@@ -119,6 +122,9 @@ export function setPlugInParameters(options: screenShotType) {
       if (canvasEvents) {
         userParamStore.setCanvasEvents(canvasEvents);
       }
+    },
+    renderOptions: ()=>{
+      userParamStore.setRenderOptions(x,y)
     }
   };
 
