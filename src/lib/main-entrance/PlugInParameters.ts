@@ -40,6 +40,7 @@ let h2cCrossImgLoadErrFn: screenShotType["h2cImgLoadErrCallback"] | null = null;
 let saveCallback: ((code: number, msg: string) => void) | null = null;
 let saveImgTitle: string | null = null;
 let canvasEvents: mouseEventType | null = null;
+let menuBarHeight = 0;
 
 export default class PlugInParameters {
   constructor() {
@@ -63,6 +64,7 @@ export default class PlugInParameters {
       destroyContainer = true;
       userToolbar = [];
       h2cCrossImgLoadErrFn = null;
+      menuBarHeight = 0;
     }
   }
 
@@ -149,6 +151,7 @@ export default class PlugInParameters {
   public setWriteImgState(state: boolean) {
     writeBase64 = state;
   }
+
   public getWriteImgState() {
     return writeBase64;
   }
@@ -245,5 +248,13 @@ export default class PlugInParameters {
   }
   public getCanvasEvents() {
     return canvasEvents;
+  }
+
+  public getMenuBarHeight() {
+    return menuBarHeight;
+  }
+
+  public setMenuBarHeight(val: number) {
+    menuBarHeight = val;
   }
 }

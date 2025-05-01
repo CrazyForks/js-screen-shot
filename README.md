@@ -148,7 +148,32 @@ export const doScreenShot = async ()=>{
 ```
 > 感谢 [@Vanisper](https://github.com/Vanisper) 提供的在electron环境下使用本插件的兼容思路。
 
+### 使用electron编写Mac软件。
+
+由于Mac上面有一个系统的标题栏，所以当我们的app在全屏的时候，工具栏会被Mac的标题栏给覆盖掉。如下图。
+
+需要添加一个参数
+
+```typescript
+  screenShotIns = new ScreenShot({
+    menuBarHeight: 22,  # Mac系统标题栏默认的高度
+  })
+```
+
+因为Mac os没有一个API可以获取到系统标题栏的高度。所以这里给几个建议值。【**可以根据项目的实际情况进行微调**】
+
+| 场景                                 | 菜单栏高度（逻辑像素）  | 说明                                                         |
+| ------------------------------------ | ----------------------- | ------------------------------------------------------------ |
+| 普通分辨率非 Retina 显示器           | 22pt                    | 最常见的标准高度                                             |
+| Retina 显示器                        | 22pt（实际像素是 44px） | Retina 显示器下缩放倍率为 2，视觉尺寸不变但像素是两倍        |
+| 开启「放大」/ 缩放显示（HiDPI 模式） | 24pt+                   | 使用「放大文本」或非原生分辨率时，系统会调整菜单栏高度       |
+| 刘海屏 MacBook（如 M1/M2 Pro）       | 24pt+                   | 刘海下菜单栏实际显示区域变高以避开摄像头（比如 macOS Monterey 开始） |
+| Accessibility 启用大字号             | 24pt+                   | 系统辅助功能或调整字体大小设置可能使菜单栏高度增加           |
+
+![截屏2025-05-01 14.37.38](https://mrxutuchuang.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2025-05-01%2014.37.38.png)
+
 ### electron示例代码
+
 如果你看完上个章节的使用方法，依然不是很理解的话，这里准备了一份在electron环境下使用本插件的demo，请移步[electron-js-web-screen-shot-demo](https://github.com/Vanisper/electron-js-web-screen-shot-demo)。
 
 
