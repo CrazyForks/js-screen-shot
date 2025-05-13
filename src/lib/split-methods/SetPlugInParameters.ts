@@ -96,4 +96,9 @@ export function setPlugInParameters(options: screenShotType) {
   if (options?.canvasEvents) {
     plugInParameters.setCanvasEvents(options.canvasEvents);
   }
+
+  // 设置标题栏的高度
+  if (options?.menuBarHeight) {
+    plugInParameters.setMenuBarHeight(options?.menuBarHeight || 0);
+  }
 }

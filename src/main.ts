@@ -968,13 +968,19 @@ export default class ScreenShot {
       this.placement,
       this.position
     );
-    const containerHeight = this.screenShotContainer.height / this.dpr;
-
+    const containerHeight =
+      this.screenShotContainer.height / this.dpr -
+      this.plugInParameters.getMenuBarHeight();
+    console.log(
+      containerHeight,
+      "abcdefg",
+      this.plugInParameters.getMenuBarHeight()
+    );
     // 工具栏的位置超出截图容器时，调整工具栏位置防止超出
     if (toolLocation.mouseY > containerHeight - 64) {
       toolLocation.mouseY -= this.drawGraphPosition.height + 64;
       // 超出屏幕顶部时
-      if (toolLocation.mouseY < 0) {
+      if (toolLocation.mouseY - this.plugInParameters.getMenuBarHeight() < 0) {
         const containerHeight = parseInt(this.screenShotContainer.style.height);
         toolLocation.mouseY = containerHeight - this.fullScreenDiffHeight;
       }
