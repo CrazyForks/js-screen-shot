@@ -98,7 +98,7 @@ export type toolbarType = {
   title: string;
   icon?: string;
   activeIcon?: string;
-  clickFn?: () => void;
+  clickFn?: (params?: any) => void;
 };
 export type crcEventType = { state: boolean; handleFn?: () => void };
 
@@ -107,7 +107,7 @@ export type userToolbarType = {
   title: string;
   icon: string;
   activeIcon: string;
-  clickFn: () => void;
+  clickFn: userToolbarFnType;
 };
 export type customToolbarType = userToolbarType & { id: number };
 
