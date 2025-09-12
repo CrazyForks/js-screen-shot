@@ -108,9 +108,9 @@
           title: "star",
           icon: "./img/pentagram.png",
           activeIcon: "./img/pentagram-h.png",
-          clickFn: ({screenShotCanvas,screenShotController,ScreenShotImageController, currentInfo}) => {
+          clickFn: ({screenShotCanvas, screenShotController, ScreenShotImageController, currentInfo, imgInfo}) => {
             screenShotCanvasContext = screenShotCanvas;
-            console.log("图标点击",screenShotCanvas,screenShotController,ScreenShotImageController, currentInfo);
+            console.log("图标点击", screenShotCanvas, screenShotController, ScreenShotImageController, currentInfo, imgInfo);
           }
         }],
         h2cImgLoadErrCallback: (err) => {

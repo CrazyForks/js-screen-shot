@@ -116,7 +116,13 @@ export type userToolbarFnType = (canvasInfo: {
   screenShotController: HTMLCanvasElement;
   ScreenShotImageController: HTMLCanvasElement;
   currentInfo: { toolName: string; toolId: number };
+  imgInfo: imgInfoType;
 }) => void; // 用户自定义工具栏点击事件
+
+export type imgInfoType = {
+  base64: string;
+  cutInfo: positionInfoType;
+};
 
 export type screenShotType = {
   enableWebRtc?: boolean; // 是否启用webrtc，默认是启用状态
@@ -124,10 +130,7 @@ export type screenShotType = {
   level?: number; // 截图容器层级
   canvasWidth?: number; // 截图画布宽度
   canvasHeight?: number; // 截图画布高度
-  completeCallback?: (imgInfo: {
-    base64: string;
-    cutInfo: positionInfoType;
-  }) => void; // 工具栏截图确认回调
+  completeCallback?: (imgInfo: imgInfoType) => void; // 工具栏截图确认回调
   closeCallback?: () => void; // 工具栏关闭回调
   h2cImgLoadErrCallback?: (err: Event & { imgUrl: string }) => void; // html2canvas跨域图片加载失败回调
   triggerCallback?: (res: {

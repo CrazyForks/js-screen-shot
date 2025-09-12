@@ -230,6 +230,10 @@ export function toolClickEventForUserDefined(
     currentInfo: {
       toolName,
       toolId: index
+    },
+    imgInfo: {
+      base64: getCanvasImgData(false),
+      cutInfo: data.getCutOutBoxPosition()
     }
   });
   data.setToolName(toolName);
