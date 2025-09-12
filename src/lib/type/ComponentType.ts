@@ -122,7 +122,7 @@ export type userToolbarFnType = (canvasInfo: {
 export type imgInfoType = {
   base64: string;
   cutInfo: positionInfoType;
-}
+};
 
 export type screenShotType = {
   enableWebRtc?: boolean; // 是否启用webrtc，默认是启用状态
