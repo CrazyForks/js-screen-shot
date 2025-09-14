@@ -212,6 +212,11 @@ export default class ScreenShot {
     }
   }
 
+  // 获取裁剪框位置信息
+  public getCutBoxInfo() {
+    return this.data.getCutOutBoxPosition();
+  }
+
   // 注册右键事件
   private registerForRightClickEvent(container: HTMLElement) {
     container.addEventListener("contextmenu", e => {
