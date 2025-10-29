@@ -1163,12 +1163,17 @@ export default class ScreenShot {
     ) {
       const borderSize = this.data.getBorderSize();
       this.getFullScreenStatus = true;
+      const width =
+        this.screenShotContainer.clientWidth || this.screenShotContainer.width;
+      const height =
+        this.screenShotContainer.clientHeight ||
+        this.screenShotContainer.height;
       // 设置裁剪框位置为全屏
       this.tempGraphPosition = drawCutOutBox(
         0,
         0,
-        this.screenShotContainer.width - borderSize / 2,
-        this.screenShotContainer.height - borderSize / 2,
+        width - borderSize / 2,
+        height - borderSize / 2,
         this.screenShotCanvas,
         borderSize,
         this.screenShotContainer,
